@@ -1,0 +1,28 @@
+# Part of this file was based a template .gitignore for the FastAPI api web framework,
+# found at:
+# https://github.com/tiangolo/fastapi/blob/master/.gitignore
+.idea
+.ipynb_checkpoints
+.mypy_cache
+.vscode
+__pycache__
+.pytest_cache
+htmlcov
+dist
+site
+.coverage
+coverage.xml
+.netlify
+test.db
+log.txt
+Pipfile.lock
+env3.*
+env
+docs_build
+venv
+docs.zip
+archive.zip
+
+# vim temporary files
+*~
+.*.sw?
