@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 
-echo "[Run] Start run script";
+# Variables
+PY_VENV_PATH='venv/';
+SKIP_INSTALL='n';
 
+echo "[Run] Install project";
 
-# Install project
-chmod +x ./install.sh
-./install.sh;
+if [ -d "$PY_VENV_PATH" ]
+then
+  echo "The venv/ directory already exists at project root. Skip the install step? (y/n)";
+  read SKIP_INSTALL;
+fi
+
+if [ "$SKIP_INSTALL" = 'n' ]
+then
+  # Install project
+  chmod +x ./install.sh;
+  ./install.sh;
+fi
+
+echo "[Run] Start web server";
 
 # Run project
-cd API
-uvicorn main:app --reload;
+flask --app API run --debug;
 
 
 echo "[Run] Finished run script";
