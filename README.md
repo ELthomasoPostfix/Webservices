@@ -29,4 +29,4 @@ Any significant sources used in writing this project, that wouldn't be immediate
 
 ## Version control
 
-The `.gitignore` file was taken, and then possibly adapted, from [this github repo](https://github.com/tiangolo/fastapi/blob/master/.gitignore), which provides a template file for the FastAPI api web framework.
+The `.gitignore` file was generated with [this website](https://www.toptal.com/developers/gitignore), which allows gitignore file generation based on used technologies, and then possibly adapted.
