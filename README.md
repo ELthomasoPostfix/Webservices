@@ -31,8 +31,21 @@ The minimally required deliverables for a passing grade are:
     </ol>
   </li>
   <li>Provide the API keys with the project source, with enough remaining quota to test the submitted solution</li>
-  <li>Additional notes: make sure no files are missing</li>
 </ol>
+
+## Submission
+
+Following project submission, a small 5-minute demo of the solution is scheduled per student.
+
+The following are additional notes on project submission
+
+<ul>
+  <li>Make sure no files are missing</li>
+  <li>Late submissions will automatically have points deducted for tardiness.</li>
+  <li>Make sure that your submission has the following format and upload it via Blackboard! 
+    <br><b>DS-Assignment1-Snumber-Lastname.zip</b>
+  </li>
+</ul>
 
 # Running the project
 
