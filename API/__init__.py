@@ -54,7 +54,7 @@ def create_app(test_config: Mapping[str, Any]=None):
     # Flask RESTful API
     api = Api(app, prefix="/api")
 
-    api.add_resource(Movies, Movies.route(), Movies.route() + '/')
+    api.add_resource(Movies, Movies.route() + '/')
     api.add_resource(Movie, Movie.route())
 
     return app
