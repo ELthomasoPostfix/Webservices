@@ -116,6 +116,10 @@ Setting the `locations` argument solves the following error response:
 }
 ```
 
+# Secrets and Configuration
+
+The configuration of the Flask app is done as conveniently as possible. All secrets are simply stored in the [configuration file](API/config.py). Safety precautions, such as an [instance directory](https://flask.palletsprojects.com/en/2.2.x/config/#instance-folders), are foregone in favor of simplicity.
+
 # Accreditation
 
 Any significant sources used in writing this project, that wouldn't be immediately obvious from reading its requirements, [dependencies](requirements.txt) and or source code, receive credit in this section.
