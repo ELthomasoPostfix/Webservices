@@ -1,2 +1,2 @@
-Flask
-flask-restful
+Flask==2.2.3
+flask-restful==0.3.9
