@@ -68,6 +68,50 @@ To run the API and web interface, simply call the run script **in the project ro
 ./run.sh
 ```
 
+# Encountered Technical Difficulties
+
+This section documents any technical difficulties and implementational struggles I encountered while working on this assignment. It is purely for my own benefit and to ease future review of this project's code.
+
+## HTTP vs HTTPS
+
+Currently, the flask app doesn't seem to support the use of HTTPS. This is likely some or the other configuration error, but not of much consequence to the project. Just **remember to use HTTP for now** in all api requests, to be safe.
+
+## Flask RESTful
+
+View the flask-restful python package's latest documentation [here](https://flask-restful.readthedocs.io/en/latest/). These docs may differ from the used version, specified in the `requirements.txt` file.
+
+### reqparse module
+
+The reqparse module offers parsing of the request arguments amongst other things. The minimal code to use it follows:
+
+```py
+from flask_restful import reqparse
+parser = reqparse.RequestParser()
+args = parser.parse_args() # The request arguments
+```
+
+To add optional parameters that don't raise an exception due to absence, set the `required` flag.
+
+```py
+parser.add_argument("requiredArg", required=False,
+    help="A required argument")
+```
+
+To specify which fields of the flask.Request the parser should search for the arguments, specify the `locations` argument.
+
+```py
+parser.add_argument("optionalQueryArg", location=('args',),
+    help="An optional query string argument, found in flask.request.args")
+```
+
+Setting the `locations` argument solves the following error response:
+
+```
+{
+    "message": "Did not attempt to load JSON data because the request Content-Type was not 'application/json'."
+}
+```
+
 # Accreditation
 
 Any significant sources used in writing this project, that wouldn't be immediately obvious from reading its requirements and or source code, receive credit in this section.
