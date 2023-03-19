@@ -23,7 +23,8 @@ same order as they are listed in the Project Specification
 section of the README
 """
 parser = reqparse.RequestParser()
-parser.add_argument(MoviesParameters.popular, type=int, required=False, help="Return the first x popular movies")
+parser.add_argument(MoviesParameters.popular, type=int, required=False, location=('args',),
+                    help="Return the first x popular movies")
 
 
 class Movies(Resource):
