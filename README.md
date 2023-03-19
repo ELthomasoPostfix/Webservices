@@ -2,6 +2,8 @@
 
 This repo contains the code for the web services assignment for the course Distributed Systems (INFORMAT 1500WETDIS) at the University of Antwerp in the academic year of 2022-2023. The author is Thomas Gueutal (s0195095).
 
+To skip to running the project, refer to [this section](#running-the-project).
+
 # Project Specification
 
 The goal of this project is to develop a RESTful API that acts as an aggregator for [the TMDB API](https://developers.themoviedb.org/3) and also adds some additional functionality, such as [plotting movie scores via another API](https://quickchart.io/documentation/). We must also provide a minimal web interface to test this API.
@@ -49,11 +51,13 @@ The following are additional notes on project submission
 
 # Running the project
 
+<b>TL;DR</b>: Call the [run script](run.sh) from the project root.
+
 The following sections describe how to run the project on **linux**. It is not guaranteed to work on windows. Feel free to skip the [installation section](#intallation) and go straight to the [startup section](#startup) as the startup script runs the installation step automatically anyways. The installation section is only present for the sake of completeness.
 
 ## Intallation
 
-Before running the API and web interface, the necessary project setup must be done. As python and [Flask](https://flask.palletsprojects.com/en/2.2.x/) are used, this includes setting up the python virtual environment and installing all dependencies. This step can be completed by simply calling the install script **in the project root**.
+Before running the API and web interface, the necessary project setup must be done. As python and [Flask](https://flask.palletsprojects.com/en/2.2.x/) are used, this includes setting up the python virtual environment and installing all dependencies. This step can be completed by simply calling the [install script](install.sh) **from the project root**.
 
 ```sh
 ./install.sh
@@ -62,7 +66,7 @@ Before running the API and web interface, the necessary project setup must be do
 
 ## Startup
 
-To run the API and web interface, simply call the run script **in the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
+To run the API and web interface, simply call the [run script](run.sh) **from the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
 
 ```sh
 ./run.sh
@@ -78,11 +82,11 @@ Currently, the flask app doesn't seem to support the use of HTTPS. This is likel
 
 ## Flask RESTful
 
-View the flask-restful python package's latest documentation [here](https://flask-restful.readthedocs.io/en/latest/). These docs may differ from the used version, specified in the `requirements.txt` file.
+View the flask-restful python package's latest documentation [here](https://flask-restful.readthedocs.io/en/latest/). These docs may differ from the used version, specified in the [`requirements.txt`](requirements.txt) file.
 
 ### reqparse module
 
-The reqparse module offers parsing of the request arguments amongst other things. The minimal code to use it follows:
+The [reqparse module](https://flask-restful.readthedocs.io/en/latest/api.html#module-reqparse) offers [parsing of the request arguments](https://flask-restful.readthedocs.io/en/latest/quickstart.html#argument-parsing) amongst other things. The minimal code to use it follows:
 
 ```py
 from flask_restful import reqparse
@@ -114,7 +118,7 @@ Setting the `locations` argument solves the following error response:
 
 # Accreditation
 
-Any significant sources used in writing this project, that wouldn't be immediately obvious from reading its requirements and or source code, receive credit in this section.
+Any significant sources used in writing this project, that wouldn't be immediately obvious from reading its requirements, [dependencies](requirements.txt) and or source code, receive credit in this section.
 
 ## Version control
 
