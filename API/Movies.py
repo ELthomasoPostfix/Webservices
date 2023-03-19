@@ -1,4 +1,6 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, current_app
+from math import ceil
+import requests
 
 class MoviesParameters(object):
     """An enum of the parameters used by the Movies resource
@@ -39,14 +41,47 @@ class Movies(Resource):
         """
         return "/movies"
 
+    @staticmethod
+    def getPopularPage(page: int) -> dict:
+        """Get a page of popular movies from the TMDB /movie/popular API.
+
+        :param page: Which page to retrieve
+        :return: The page in json format if successful, else an empty dict
+        """
+        # guard clause, based on TMDB page param requirements
+        if page < 1 or page > 1000:
+            return {}
+        return requests.get(f"https://api.themoviedb.org/3/movie/popular?page={page}&api_key={current_app.config['API_KEY_TMDB']}").json()
+
     def get(self):
         args = parser.parse_args()
 
-        popular: int | None = args[MoviesParameters.popular]
+        popular_x: int | None = args[MoviesParameters.popular]
         result: dict = dict()
 
-        if popular is not None:
-            assert popular >= 0, f"The {MoviesParameters.popular} parameter may not be negative"
-            result[MoviesParameters.popular] = [i for i in range(popular)]
+        if popular_x is not None:
+            assert popular_x >= 0, f"The {MoviesParameters.popular} parameter may not be negative"
+
+            popular_x_movies = []
+            remaining_movies: int = popular_x
+            total_pages_available: int = 1
+            current_page: int = 1
+
+            while remaining_movies > 0 and current_page <= total_pages_available:
+                # Query TMDB API
+                # Has Protection against change in pagecount during long query (large popularx)
+                tmdb_page: dict = self.getPopularPage(page=current_page)
+                total_pages_available = tmdb_page["total_pages"]
+                results = tmdb_page["results"][:remaining_movies]
+
+                # Bookkeeping
+                remaining_movies -= len(results)
+                current_page += 1
+
+                # Append results
+                popular_x_movies.extend(results)
+
+            result[MoviesParameters.popular] = popular_x_movies
+
 
         return result
