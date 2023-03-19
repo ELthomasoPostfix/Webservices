@@ -1,1 +1,2 @@
 SECRET_KEY='dev'
+API_KEY_TMDB='ebae29385c26d7eb94b6daa8e41175a4'
