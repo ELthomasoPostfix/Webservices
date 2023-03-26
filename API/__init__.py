@@ -1,7 +1,8 @@
 from flask import Flask
-from flask_restful import Api, Resource
+from flask_restful import Api as RESTAPI
 from typing import Mapping, Any
 
+from .API import API
 from .Movies import Movies
 from .Movie import Movie
 
@@ -18,17 +19,19 @@ form
 }
 where MovieAttributes describes the global attributes
 stored for each movie by the API. These attributes
-facilitate project requirements x) and y) described
-in the project's README.
+facilitate project requirements 6. (deletes movie)
+and 7. ((un)like movies) described in the project
+root's README.
 """
 movies_attributes: dict[int, MovieAttributes] = dict()
 
 
 def create_app(test_config: Mapping[str, Any]=None):
-    """The app factory used in the run script to start the
-    backend api.
+    """The flask app factory.
+     
+    .. used in the run script to start the backend api.
 
-    :param test_config: If not None, then this config will be
+    :param test_config: If not None, then the passed config will be
     used. Else, the config specified in config.py will be used.
     :return: The app instance
     """
@@ -52,8 +55,9 @@ def create_app(test_config: Mapping[str, Any]=None):
     #     pass
 
     # Flask RESTful API
-    api = Api(app, prefix="/api")
+    api = RESTAPI(app, prefix="/api")
 
+    api.add_resource(API, API.route())
     api.add_resource(Movies, Movies.route() + '/')
     api.add_resource(Movie, Movie.route())
 
