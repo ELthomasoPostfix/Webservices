@@ -22,7 +22,7 @@ fi
 echo "[Run] Start web server";
 
 # Run project
-flask --app API run --debug;
+flask --app API --debug run;
 
 
 echo "[Run] Finished run script";
