@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api as RESTAPI
+from flask_cors import CORS
 from typing import Mapping, Any
 
 from .API import API
@@ -37,6 +38,7 @@ def create_app(test_config: Mapping[str, Any]=None):
     """
     # create and configure the app
     app = Flask(__name__)
+    CORS(app)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
