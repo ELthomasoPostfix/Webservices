@@ -116,6 +116,10 @@ Setting the `locations` argument solves the following error response:
 }
 ```
 
+## Flask CORS
+
+The frontend and backend api components are standalone, so without CORS enabled any frontend fetches to the backend fail. CORS is simply implemented using the flask-cors package in this project.
+
 # Secrets and Configuration
 
 The configuration of the Flask app is done as conveniently as possible. All secrets are simply stored in the [configuration file](API/config.py). Safety precautions, such as an [instance directory](https://flask.palletsprojects.com/en/2.2.x/config/#instance-folders), are foregone in favor of simplicity.
