@@ -118,7 +118,41 @@ Setting the `locations` argument solves the following error response:
 
 ## Flask CORS
 
+At first I tried to simply make the frontend work using the file protocol, e.g. `file://path/to/index.html`. Any fetches threw CORS errors however, so I decided to simply run a separate http server to provide the frontend application instead.
+
+As a first attempt, I tried to utilize python3's SimpleHTTPServer module to run an https server, because calls over http failed for one reason or the other. The following python script was used in the attempt:
+
+```py
+from http.server import HTTPServer,SimpleHTTPRequestHandler
+import ssl
+
+httpd = HTTPServer(('localhost', 1443), SimpleHTTPRequestHandler)
+# Since version 3.10: SSLContext without protocol argument is deprecated. 
+# sslctx = ssl.SSLContext()
+sslctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+sslctx.check_hostname = False # If set to True, only the hostname that matches the certificate will be accepted
+sslctx.load_cert_chain(certfile='./generated/server.pem', keyfile="./generated/key.pem")
+httpd.socket = sslctx.wrap_socket(httpd.socket, server_side=True)
+httpd.serve_forever()
+```
+
+The certificate used above was generated during the install script
+
+```sh
+# Generate ssl cert. for the simple https server to work
+echo "[Install] Generate ssl certificate";
+mkdir Web/generated
+openssl req -new -x509 -keyout Web/generated/key.pem -out Web/generated/server.pem -days 365 -nodes  \
+-subj "/C=BE/ST=Antwerpen/L=Antwerpen/O=UAntwerpen/OU=Student-DS/CN=Thomas-Gueutal/emailAddress=Thomas.Gueutal@student.uantwerpen.be" \
+> /dev/null
+```
+
+However, this attempt was abandoned because the certificate was not signed by a trusted authorits, making browsers like chrome flag and reject to visit the frontend pages.
+
+This, I created a [vuejs](https://vuejs.org/guide/introduction.html) project based on vite, which provides a builtin development http server by default, to serve the frontend instead.
+
 The frontend and backend api components are standalone, so without CORS enabled any frontend fetches to the backend fail. CORS is simply implemented using the flask-cors package in this project.
+
 
 # Secrets and Configuration
 
