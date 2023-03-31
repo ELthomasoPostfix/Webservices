@@ -48,7 +48,7 @@ function onClick() {
 </script>
 
 <template>
-  <div>
+  <main>
     <h1>Movies</h1>
 
     <form @submit.prevent="">
@@ -63,5 +63,5 @@ function onClick() {
         {{ value.title }}
       </li>
     </ul>
-</div>
+  </main>
 </template>
