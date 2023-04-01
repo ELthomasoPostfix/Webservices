@@ -33,8 +33,7 @@ parser.add_argument(MoviesParameters.popular, type=int, required=False, location
 
 
 class Movies(Resource):
-    """The api endpoint that represents the collection
-    of all movie resources.
+    """The api endpoint that represents the collection of all movie resources.
     """
     @staticmethod
     def route() -> str:

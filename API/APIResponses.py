@@ -1,4 +1,3 @@
-from typing import Literal
 from flask import make_response, Response
 
 
