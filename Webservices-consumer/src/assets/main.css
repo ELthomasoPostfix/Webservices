@@ -1,10 +1,15 @@
 @import './base.css';
 
+/** By default, a 3 row x 1 col grid that spans 100vh in height */
+#app {
+  display: grid;
+  grid-template-rows: 100px 1fr 100px;
+  padding: 0 2rem;
+  height: 100vh;
+}
 
 main {
   display: grid;
-  grid-column-start: 2;
-  grid-column-end: 2;
   grid-row-start: 2;
   justify-content: center;
 
@@ -12,6 +17,16 @@ main {
   margin-left: 1rem;
   margin-right: 1rem;
   margin-top: 0;        /** Align main content with the top of its bounding box */
+}
+
+footer {
+  position: relative;
+  bottom: 0;
+  margin-bottom: 1rem;
+
+  grid-row-start: 3;
+  grid-row-end: 3;
+  grid-column-start: span 3;
 }
 
 a,
@@ -28,23 +43,20 @@ a,
 }
 
 @media (min-width: 1024px) {
+  /** Once enough room, move main content to second column */
+  main {
+    grid-column-start: 2;
+    grid-column-end: 2;
+  }
+
   body {
     display: flex;
     place-items: center;
     height: 100%;
   }
 
-  footer {
-    grid-row-start: 3;
-    grid-row-end: 3;
-    grid-column-start: span 3;
-  }
-
+  /** Once enough room, add a second col */
   #app {
-    display: grid;
     grid-template-columns: 250px 1fr;
-    grid-template-rows: 100px 1fr 50px;
-    padding: 0 2rem;
-    height: 100vh;
   }
 }
