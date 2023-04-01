@@ -1,12 +1,13 @@
+from typing import Literal
 from flask import make_response, Response
 
 
 class GenericResponseMessages:
     """A class of constants used to construct response messages."""
-    SUCCESS: str    = "Success"
-    ERROR: str      = "Something went wrong"
-    UNEXPECTED: str = "Encountered an unexpected exception"
-    MALFORMED_REQ: str = "Malformed request"
+    SUCCESS    = "Success"
+    ERROR      = "Something went wrong"
+    UNEXPECTED = "Encountered an unexpected exception"
+    MALFORMED_REQ = "Malformed request"
 
 
 def make_response_message(message: str, status_code: int, **kwargs) -> Response:
