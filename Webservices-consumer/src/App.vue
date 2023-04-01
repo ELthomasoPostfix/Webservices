@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+
+import ExternalsAccreditation from './components/ExternalsAccreditation.vue';
+
 </script>
 
 <template>
@@ -7,13 +10,20 @@ import { RouterLink, RouterView } from 'vue-router'
     <div class="wrapper">
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/movies">Movies</RouterLink>
+        <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
   </header>
 
+  <!-- Main content -->
   <RouterView />
+
+  <footer>
+    <!-- External services accreditation -->
+    <ExternalsAccreditation />
+  </footer>
+
 </template>
 
 <style scoped>
