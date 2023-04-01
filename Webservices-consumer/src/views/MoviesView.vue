@@ -2,6 +2,8 @@
 import { ref, type Ref, computed } from "vue";
 import type { Movie } from "../code/interfaces";
 
+import MainContentHeader from "@/components/MainContentHeader.vue";
+
 
 /** Popular x input state */
 const popular_x = ref(0);
@@ -49,10 +51,11 @@ function onClick() {
 
 <template>
   <main>
-    <h1>Movies</h1>
+    <MainContentHeader title="Movies"/>
 
+    <!-- Movies view content -->
     <form @submit.prevent="">
-      <label for="input-popularX">First {{ popular_x_repr_string }} popular movies</label>
+      <label style="padding-right: 1rem;" for="input-popularX">First {{ popular_x_repr_string }} popular movies</label>
       <input id="input-popularX" type="number" min="0" v-model="popular_x"/>
       <button id="button-popularX" @click="onClick">Get popular {{ popular_x_repr_string }}</button>
     </form>
