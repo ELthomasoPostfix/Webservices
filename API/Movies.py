@@ -103,9 +103,10 @@ class Movies(Resource):
                     popular_x_movies.extend(results)
 
                 result[MoviesParameters.popular] = popular_x_movies
+
+                return make_response_message(E_MSG.SUCCESS, 200, result=result)
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
         except Exception as e:
             return make_response_error(E_MSG.UNEXPECTED, "Unexpected exception while querying the Movies collection", 500)
 
-        return make_response_message(E_MSG.SUCCESS, 200, result=result)
