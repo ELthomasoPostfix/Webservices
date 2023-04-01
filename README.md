@@ -165,3 +165,7 @@ Any significant sources used in writing this project, that wouldn't be immediate
 ## Version control
 
 The `.gitignore` file was generated with [this website](https://www.toptal.com/developers/gitignore), which allows gitignore file generation based on used technologies, and then possibly adapted.
+
+## TMDB
+
+Though this dependency is already explicitly stated often, it bears mentioning that the [TMDB API terms of use](https://www.themoviedb.org/documentation/api/terms-of-use) requires any user or product to feature the TMDB logo and credit notice, as written in section `1.A.2` and the section "What are the attribution requirements?" [here](https://www.themoviedb.org/documentation/api). The frontend application satisfies this requirement by accrediting TMDB at the bottom of every page.
