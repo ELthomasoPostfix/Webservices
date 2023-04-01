@@ -60,7 +60,7 @@ function onClick() {
       style="margin-top: 1rem; margin-bottom: 1rem;"
     >
       <label for="input-popularX" style="padding-right: 1rem;">First X popular movies</label>
-      <input style="margin-right: 1rem; max-width: 100px;" id="input-popularX" type="number" min="0" v-model="popular_x"/>
+      <input style="margin-right: 1rem; min-width: 100px; max-width: 200px;" id="input-popularX" type="number" min="0" v-model="popular_x"/>
       <button id="button-popularX" @click="onClick">Get popular {{ popular_x_repr_string }}</button>
     </form>
 
