@@ -7,6 +7,8 @@ main {
   grid-column-end: 2;
   grid-row-start: 2;
   justify-content: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 a,
