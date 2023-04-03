@@ -10,21 +10,31 @@ from .Movie import Movie
 from .MovieAttributes import MovieAttributes
 
 
-"""The backend api's database substitute.
+class MoviesAttributes(dict[int, MovieAttributes]):
+    """The backend api's database substitute.
 
-For the sake of simplicity, no database will be used
-in this project. Instead we use a simple dict of the
-form
-{
-    movie_id : MovieAttributes
-}
-where MovieAttributes describes the global attributes
-stored for each movie by the API. These attributes
-facilitate project requirements 6. (deletes movie)
-and 7. ((un)like movies) described in the project
-root's README.
-"""
-movies_attributes: dict[int, MovieAttributes] = dict()
+    For the sake of simplicity, no database will be used
+    in this project. Instead we use a simple dict of the
+    form ::
+
+        {
+            movie_id : MovieAttributes
+        }
+    
+    where MovieAttributes describes the global attributes
+    stored for each movie by the API. These attributes
+    facilitate project requirements 6. (delete movies)
+    and 7. ((un)like movies) described in the project
+    root's README.
+    """
+    def __getitem__(self, __key: int) -> MovieAttributes | None:
+        """Call super().__getitem__, but return None if the movie is deleted."""
+        value: MovieAttributes = super().__getitem__(__key)
+        if value.deleted:
+            return None
+        return value
+    
+movies_attributes: MoviesAttributes = MoviesAttributes()
 
 
 def create_app(test_config: Mapping[str, Any]=None):
