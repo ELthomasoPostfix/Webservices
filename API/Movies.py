@@ -1,7 +1,8 @@
 import requests
-from requests.exceptions import JSONDecodeError, InvalidJSONError
+from requests.exceptions import JSONDecodeError
 from flask_restful import Resource, reqparse, current_app
 
+from .utils import catch_unexpected_exceptions
 from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG
 
 
@@ -55,6 +56,7 @@ class Movies(Resource):
             return {}
         return requests.get(f"https://api.themoviedb.org/3/movie/popular?page={page}&api_key={current_app.config['API_KEY_TMDB']}")
 
+    @catch_unexpected_exceptions("query the Movies collection")
     def get(self):
         """The filter/search endpoint of the collection of all movies.
 
@@ -66,8 +68,8 @@ class Movies(Resource):
         :return: The result of the filter query, ``{}`` by default
         """
         args = parser.parse_args()
-
         try:
+            from . import movies_attributes
             popular_x: int | None = args[MoviesParameters.popular]
             result: dict = dict()
 
@@ -92,8 +94,14 @@ class Movies(Resource):
 
 
                     tmdb_resp_json = tmdb_resp.json()
+                    results = tmdb_resp_json["results"]
+                    results = [
+                        result
+                        for result in results
+                        if not movies_attributes.is_deleted(result["id"])
+                    ]
+                    results = results[:remaining_movies]
                     total_pages_available = tmdb_resp_json["total_pages"]
-                    results = tmdb_resp_json["results"][:remaining_movies]
 
                     # Bookkeeping
                     remaining_movies -= len(results)
@@ -107,6 +115,5 @@ class Movies(Resource):
             return make_response_message(E_MSG.SUCCESS, 200, result=result)
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
-        except Exception as e:
-            return make_response_error(E_MSG.UNEXPECTED, "Unexpected exception while querying the Movies collection", 500)
+
 
