@@ -1,11 +1,12 @@
 from flask import Flask
 from flask_restful import Api as RESTAPI
 from flask_cors import CORS
-from typing import Mapping, Any
+from typing import Mapping, Any, List
 
 from .API import API
 from .Movies import Movies
 from .Movie import Movie
+
 
 from .MovieAttributes import MovieAttributes
 
@@ -27,13 +28,24 @@ class MoviesAttributes(dict[int, MovieAttributes]):
     and 7. ((un)like movies) described in the project
     root's README.
     """
-    def __getitem__(self, __key: int) -> MovieAttributes | None:
-        """Call super().__getitem__, but return None if the movie is deleted."""
-        value: MovieAttributes = super().__getitem__(__key)
-        if value.deleted:
-            return None
-        return value
+    def filter_valid_non_deleted_keys(self, keys: List[int]) -> List[int]:
+        """Filter the list of keys to and keep only the valid keys with a deleted prop value of `False`.
+
+        :param keys: The list of keys to filter
+        :return: The list of filtered keys
+        """
+        return [key for key in keys if key in self and not self.is_deleted(key)]
     
+    def is_deleted(self, key: int) -> bool:
+        """Check whether the movie corresponding to the key is deleted.
+
+        If the key is not part of the dict, then `False` is returned.
+
+        :param key: The key to check the status for
+        :return: The movie's deleted status
+        """
+        return key in self and self[key].deleted
+
 movies_attributes: MoviesAttributes = MoviesAttributes()
 
 
@@ -72,5 +84,6 @@ def create_app(test_config: Mapping[str, Any]=None):
     api.add_resource(API, API.route())
     api.add_resource(Movies, Movies.route() + '/')
     api.add_resource(Movie, Movie.route())
+
 
     return app
