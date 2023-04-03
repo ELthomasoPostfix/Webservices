@@ -10,6 +10,9 @@ from .APIResponses import GenericResponseMessages as E_MSG, make_response_error,
 
 class Movie(Resource):
     """The api endpoint that represents a single movie resource.
+
+    This resource supports project requirement 6.: ’delete’ movies
+    by implementing the delete http method.
     """
     @staticmethod
     def route() -> str:

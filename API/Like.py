@@ -12,6 +12,8 @@ class Like(Resource):
 
     A like is simply a TMDB movie id, linked to a boolean describing whether
     that specific movie has been liked or not.
+
+    This resource supports project requirement 7.: liking/un-liking movies.
     """
     @staticmethod
     def route() -> str:
