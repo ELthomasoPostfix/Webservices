@@ -63,3 +63,46 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
 
         return wrapper
     return decorator
+
+def require_movie_not_deleted(http_method: Callable):
+    """A convenience wrapper that requires a `mov_id` function paramter to not be part of the deleted movies.
+
+    This wrapper condences the boilerplate of handling checking whether the `mov_id` parameter,
+    of the wrapped function is marked as deleted or not. Its use is recommended for the sake of
+    elegance and, more importantly, avoiding code duplication while also somewhat enforcing a
+    uniform return format in the case of the movie being deleted.
+
+    e.g. ::
+        deleted_movies = [1, 2, 3]
+
+        @require_movie_not_deleted
+        def get_movie_info(mov_id: int):
+            return {
+                "title": "mov_" + str(mov_id),
+                "id": mov_id
+            }
+
+    .. function:: get_movie_info(mov_id: int)
+    In the previous code, calling :func:`add(2)` would result in the following response body with a status code of 404: ::
+        {
+        "error": "This movie resource does not exist",
+        "message": "Something went wrong"
+        }
+
+    :param http_method: The wrapped http method
+    :return: The decorator
+    """
+    def wrapper(*args, **kwargs):
+        # The decorator is called instead of the wrapped
+        # function, but flask restful expects the called
+        # method to have an http verb (get, post, put,
+        # delete, ...) as its name.
+        from . import movies_attributes
+        mov_id: int = kwargs["mov_id"]
+        if mov_id in movies_attributes and movies_attributes.is_deleted(mov_id):
+            return make_response_error(E_MSG.ERROR, "This movie resource does not exist", 404)
+
+        return http_method(*args, **kwargs)
+
+    wrapper.__name__ = http_method.__name__
+    return wrapper
