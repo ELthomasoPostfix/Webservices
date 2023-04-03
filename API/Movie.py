@@ -23,7 +23,7 @@ class Movie(Resource):
         return f"{Movies.route()}/<int:mov_id>"
 
     @staticmethod
-    def getMovie(movie_id: int) -> requests.Response:
+    def get_movie(movie_id: int) -> requests.Response:
         """Get the primary information about a movie from the TMDB ``/movie/{movie_id}`` API.
 
         :param movie_id: Which movie's information to retrieve
@@ -40,7 +40,7 @@ class Movie(Resource):
         """
         # Query TMDB API
         # Has Protection against change in pagecount during long query (large popularx)
-        tmdb_resp = self.getMovie(movie_id=mov_id)
+        tmdb_resp = self.get_movie(movie_id=mov_id)
         if not tmdb_resp.ok:
             return make_response_error(E_MSG.ERROR, "TMDB raised an exception while fetching a movie's primary information", 500)
 

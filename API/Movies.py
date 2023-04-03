@@ -45,7 +45,7 @@ class Movies(Resource):
         return "/movies"
 
     @staticmethod
-    def getPopularPage(page: int) -> requests.Response:
+    def get_popular_page(page: int) -> requests.Response:
         """Get a *page* of popular movies from the TMDB ``/movie/popular`` API.
         
         :param page: Which page to retrieve
@@ -87,7 +87,7 @@ class Movies(Resource):
                 while remaining_movies > 0 and current_page <= total_pages_available:
                     # Query TMDB API
                     # Has Protection against change in pagecount during long query (large popularx)
-                    tmdb_resp = self.getPopularPage(page=current_page)
+                    tmdb_resp = self.get_popular_page(page=current_page)
 
                     if not tmdb_resp.ok:
                         return make_response_error(E_MSG.ERROR, "TMDB raised an exception while fetching a popular page", 500)
