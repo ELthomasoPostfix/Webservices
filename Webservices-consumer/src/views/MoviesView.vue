@@ -27,7 +27,7 @@ interface MoviesResponse {
 }
 
 function onClick() {
-  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies?popularx=${popular_x.value}`, {
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/?popularx=${popular_x.value}`, {
       credentials: "same-origin"
     })
   .then(async (response) => {
