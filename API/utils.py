@@ -29,12 +29,14 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
     .. function:: add(x: int, y: int)
     .. function:: sub(x: int, y: int)
     In the previous code, calling :func:`add` would result in the following response body: ::
+    
         {
             "error": "Unexpected error, failed to add numbers",
             "message": "Encountered an unexpected exception"
         }
     
     And calling :func:`sub` would result in the following response body: ::
+
         {
             "error": "Unexpected error, failed to add numbers",
             "exception": "bogus sub exception",
@@ -73,6 +75,7 @@ def require_movie_not_deleted(http_method: Callable):
     uniform return format in the case of the movie being deleted.
 
     e.g. ::
+
         deleted_movies = [1, 2, 3]
 
         @require_movie_not_deleted
@@ -84,9 +87,10 @@ def require_movie_not_deleted(http_method: Callable):
 
     .. function:: get_movie_info(mov_id: int)
     In the previous code, calling :func:`add(2)` would result in the following response body with a status code of 404: ::
+
         {
-        "error": "This movie resource does not exist",
-        "message": "Something went wrong"
+            "error": "This movie resource does not exist",
+            "message": "Something went wrong"
         }
 
     :param http_method: The wrapped http method
