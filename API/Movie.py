@@ -2,7 +2,7 @@ from json import JSONDecodeError
 import requests
 from flask_restful import Resource, current_app
 
-from .utils import catch_unexpected_exceptions
+from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .MovieAttributes import MovieAttributes
 from .Movies import Movies
 from .APIResponses import GenericResponseMessages as E_MSG, make_response_error, make_response_message
@@ -29,18 +29,12 @@ class Movie(Resource):
         return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={current_app.config['API_KEY_TMDB']}")
 
     @catch_unexpected_exceptions("fetch a movie's primary information")
+    @require_movie_not_deleted
     def get(self, mov_id: int):
         """The query endpoint of the primary information for a single, specific movie resource.
 
-        :return: The movie's 'deleted' status and, if not deleted, its primary information
+        :return: The movie's primary information
         """
-        from . import movies_attributes
-
-        # Do not return deleted movies
-        is_deleted: bool = movies_attributes.get(mov_id, MovieAttributes(deleted=False)).deleted
-        if is_deleted:
-            return make_response_message(E_MSG.SUCCESS, 204)
-
         # Query TMDB API
         # Has Protection against change in pagecount during long query (large popularx)
         tmdb_resp = self.getMovie(movie_id=mov_id)
@@ -48,11 +42,12 @@ class Movie(Resource):
             return make_response_error(E_MSG.ERROR, "TMDB raised an exception while fetching a movie's primary information", 500)
 
         try:
-            return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp.json(), deleted=is_deleted)
+            return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp.json())
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
 
-    @catch_unexpected_exceptions("deleting a movie")
+    @catch_unexpected_exceptions("delete a movie", True)
+    @require_movie_not_deleted
     def delete(self, mov_id: int):
         """The delete endpoint for a single, specific movie resource.
 
@@ -64,8 +59,8 @@ class Movie(Resource):
         from . import movies_attributes
 
         if mov_id in movies_attributes:
-            movies_attributes[mov_id] = MovieAttributes(deleted=True)
-        else:
             movies_attributes[mov_id].deleted = True
+        else:
+            movies_attributes[mov_id] = MovieAttributes(deleted=True)
 
         return make_response_message(E_MSG.SUCCESS, 200)
