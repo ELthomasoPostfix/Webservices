@@ -7,7 +7,6 @@ from .API import API
 from .Movies import Movies
 from .Movie import Movie
 
-
 from .MovieAttributes import MovieAttributes
 
 
@@ -45,6 +44,16 @@ class MoviesAttributes(dict[int, MovieAttributes]):
         :return: The movie's deleted status
         """
         return key in self and self[key].deleted
+    
+    def not_deleted(self, key: int) -> bool:
+        """Check whether the movie corresponding to the key is not deleted.
+
+        If the key is not part of the dict, then `True` is returned.
+
+        :param key: The key to check the status for
+        :return: The movie's non-deleted status
+        """
+        return not self.is_deleted(key)
 
 movies_attributes: MoviesAttributes = MoviesAttributes()
 
