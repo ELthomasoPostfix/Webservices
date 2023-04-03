@@ -27,7 +27,7 @@ class Movie(Resource):
         """Get the primary information about a movie from the TMDB ``/movie/{movie_id}`` API.
 
         :param movie_id: Which movie's information to retrieve
-        :return: The movie's primary information in json format if successful, else ``{}``
+        :return: The TMDB response, containing the requested movie if successful
         """
         return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={current_app.config['API_KEY_TMDB']}")
 

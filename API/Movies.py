@@ -49,7 +49,7 @@ class Movies(Resource):
         """Get a *page* of popular movies from the TMDB ``/movie/popular`` API.
         
         :param page: Which page to retrieve
-        :return: The page in json format if successful, else ``{}``
+        :return: The TMDB response, containing the list op popular movies if successful
         """
         # guard clause, based on TMDB page param requirements
         if page < 1 or page > 1000:
