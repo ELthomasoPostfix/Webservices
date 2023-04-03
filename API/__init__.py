@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_restful import Api as RESTAPI
 from flask_cors import CORS
-from typing import Mapping, Any, List
+from typing import Iterable, Mapping, Any, List
 
 from .API import API
 from .Movies import Movies
 from .Movie import Movie
+from .Likes import Likes
+from .Like import Like
 
 from .MovieAttributes import MovieAttributes
 
@@ -27,8 +29,8 @@ class MoviesAttributes(dict[int, MovieAttributes]):
     and 7. ((un)like movies) described in the project
     root's README.
     """
-    def filter_valid_non_deleted_keys(self, keys: List[int]) -> List[int]:
-        """Filter the list of keys to and keep only the valid keys with a deleted prop value of `False`.
+    def filter_valid_non_deleted_keys(self, keys: Iterable[int]) -> List[int]:
+        """Filter the iterable of keys and keep only the existing keys with a deleted prop value of `False`.
 
         :param keys: The list of keys to filter
         :return: The list of filtered keys
@@ -93,6 +95,7 @@ def create_app(test_config: Mapping[str, Any]=None):
     api.add_resource(API, API.route())
     api.add_resource(Movies, Movies.route() + '/')
     api.add_resource(Movie, Movie.route())
-
+    api.add_resource(Likes, Likes.route() + '/')
+    api.add_resource(Like, Like.route())
 
     return app
