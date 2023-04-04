@@ -1,5 +1,7 @@
 import flask
+from werkzeug import exceptions as w_exceptions
 from typing import Any, Callable
+
 from .APIResponses import GenericResponseMessages as E_MSG, make_response_error
 
 
@@ -57,6 +59,10 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
         def wrapper(*args, **kwargs) -> flask.Response | Any:
             try:
                 return http_method(*args, **kwargs)
+            # Let reqparse error feedback through
+            except w_exceptions.BadRequest as e:
+                raise e
+            # Handle the rest appropriately
             except Exception as e:
                 if return_exception:
                     return make_response_error(E_MSG.UNEXPECTED, f"Unexpected error, failed to {action_description}", 500,
