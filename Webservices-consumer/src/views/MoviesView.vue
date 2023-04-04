@@ -36,6 +36,7 @@ interface MoviesResponse {
   },
 }
 
+/** Fetch the first x popular movies and update the state variable upon success */
 function onClick() {
   fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/?popularx=${popular_x.value}`, {
       credentials: "same-origin"
