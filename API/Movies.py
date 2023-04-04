@@ -3,6 +3,7 @@ from requests.exceptions import JSONDecodeError
 from flask_restful import Resource, reqparse, current_app
 
 from .utils import catch_unexpected_exceptions
+from .exceptions import NotOKError
 from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG
 
 
@@ -90,8 +91,7 @@ class Movies(Resource):
                     tmdb_resp = self.get_popular_page(page=current_page)
 
                     if not tmdb_resp.ok:
-                        return make_response_error(E_MSG.ERROR, "TMDB raised an exception while fetching a popular page", 500)
-
+                        raise NotOKError("TMDB raised an exception while fetching a popular page")
 
                     tmdb_resp_json = tmdb_resp.json()
                     results = tmdb_resp_json["results"]
@@ -115,5 +115,7 @@ class Movies(Resource):
             return make_response_message(E_MSG.SUCCESS, 200, result=result)
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
+        except NotOKError as e:
+            return make_response_error(E_MSG.ERROR, str(e), 502)
 
 

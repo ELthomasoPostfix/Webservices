@@ -3,6 +3,7 @@ import requests
 from flask_restful import Resource, current_app
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
+from .exceptions import NotOKError
 from .MovieAttributes import MovieAttributes
 from .Movies import Movies
 from .APIResponses import GenericResponseMessages as E_MSG, make_response_error, make_response_message
@@ -38,16 +39,18 @@ class Movie(Resource):
 
         :return: The movie's primary information
         """
-        # Query TMDB API
-        # Has Protection against change in pagecount during long query (large popularx)
-        tmdb_resp = self.get_movie(movie_id=mov_id)
-        if not tmdb_resp.ok:
-            return make_response_error(E_MSG.ERROR, "TMDB raised an exception while fetching a movie's primary information", 500)
-
         try:
+            # Query TMDB API
+            # Has Protection against change in pagecount during long query (large popularx)
+            tmdb_resp = self.get_movie(movie_id=mov_id)
+            if not tmdb_resp.ok:
+                raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
+
             return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp.json())
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
+        except NotOKError as e:
+            return make_response_error(E_MSG.ERROR, str(e), 502)
 
     @catch_unexpected_exceptions("delete a movie", True)
     @require_movie_not_deleted
