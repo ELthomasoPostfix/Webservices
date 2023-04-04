@@ -7,13 +7,13 @@ import MovieCard from './MovieCard.vue';
 
 defineProps<{
     /** The movie data to display inside individual movie cards. */
-    movies_data: Array<Movie>;
+    moviesData: Array<Movie>;
 }>();
 </script>
 
 <template>
     <div class="movie-grid">
-      <div v-for="(movie) in movies_data" :key="movie.title">
+      <div v-for="(movie) in moviesData" :key="movie.title">
         <MovieCard class="grid-element" :movie="movie"/>
       </div>
     </div>

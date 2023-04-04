@@ -75,6 +75,6 @@ function onClick() {
     </form>
 
     <p v-if="popular_x_data.length == 0" id="results-popularX">No results yet</p>
-    <MovieGrid v-else :movies_data="displayable_data"/>
+    <MovieGrid v-else :movies-data="displayable_data"/>
   </main>
 </template>
