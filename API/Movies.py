@@ -52,9 +52,6 @@ class Movies(Resource):
         :param page: Which page to retrieve
         :return: The TMDB response, containing the list op popular movies if successful
         """
-        # guard clause, based on TMDB page param requirements
-        if page < 1 or page > 1000:
-            return {}
         return requests.get(f"https://api.themoviedb.org/3/movie/popular?page={page}&api_key={current_app.config['API_KEY_TMDB']}")
 
     @catch_unexpected_exceptions("query the Movies collection")
@@ -87,7 +84,6 @@ class Movies(Resource):
 
                 while remaining_movies > 0 and current_page <= total_pages_available:
                     # Query TMDB API
-                    # Has Protection against change in pagecount during long query (large popularx)
                     tmdb_resp = self.get_popular_page(page=current_page)
 
                     if not tmdb_resp.ok:
