@@ -56,6 +56,7 @@ def make_response_error(message: str, error_message: str, status_code: int, **kw
             "error": "Not implemented",
             "redirect: "https://www.example.com"
         }
+
     :param message: The json body `message` key's value
     :param error_message: The json body `error` key's value
     :param status_code: The response status code
