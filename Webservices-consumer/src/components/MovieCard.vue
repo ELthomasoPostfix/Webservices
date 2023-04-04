@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import type { Movie } from '../code/interfaces';
 defineProps<{
-    /** The movie's title */
-    title: String
+    /** The movie to display */
+    movie: Movie
 }>();
 </script>
 
 <template>
     <div class="movie-card">
         <h6 class="movie-card-title">
-            {{ title }}
+            {{ movie.title }}
         </h6>
     </div>
 </template>
