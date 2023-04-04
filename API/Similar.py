@@ -2,6 +2,7 @@ import requests
 from json import JSONDecodeError
 from typing import List, Callable
 from flask_restful import Resource, reqparse, current_app
+import werkzeug
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKError
@@ -111,6 +112,8 @@ parser.add_argument(SimilarityParameters.GENRES, required=False, location=('args
                     help="Get the movies whose genres match exactly with the subject movie")
 parser.add_argument(SimilarityParameters.RUNTIME, required=False, location=('args',),
                     help="Get the movies whose runtime is similar to the subject movie")
+parser.add_argument('amount', required=True, type=int, location=('args',),
+                    help="Get the amount of movies similar to the subject movie")
 
 
 
@@ -137,6 +140,9 @@ class Similar(Resource):
         """
         return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={current_app.config['API_KEY_TMDB']}")
 
+    @staticmethod
+    def get_discover_page(page: int, query_string: str):
+        return requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}&page={page}")
 
     @catch_unexpected_exceptions("find similar movies", True)
     @require_movie_not_deleted
@@ -145,8 +151,14 @@ class Similar(Resource):
 
         :return: The similar movies
         """
+        from . import movies_attributes
         args = parser.parse_args()
         supplied_valid_arg_names = [argName for argName in SimilarityParameters.accepted_parameters() if args[argName] is not None]
+        remaining_movies: int = args["amount"]
+
+        similar_movies = []
+        total_pages_available: int = 1
+        current_page: int = 1
 
         try:
             query_string: str = ""
@@ -155,17 +167,35 @@ class Similar(Resource):
             # Construct TMDB query string
             for keyword in supplied_valid_arg_names:
                 query_substr_constructor = substring_constructors.get(keyword, None)
-                query_substr_constructor = None
                 if query_substr_constructor is None:
                     raise RuntimeError(f"A valid and accepted Webservices similarity parameter, '{keyword}', is missing a TMDB query substring constructor implementation")
                 query_string += "&" + query_substr_constructor(mov_id)
             
-            # Query TMDB API for similar movies
-            tmdb_resp = requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}")
-            if not tmdb_resp.ok:
-                raise NotOKError("TMDB raised an exception while fetching similar movies")
+            while remaining_movies > 0 and current_page <= total_pages_available:
 
-            return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp.json())
+                # Query TMDB API for similar movies
+                tmdb_resp = self.get_discover_page(current_page, query_string)
+                if not tmdb_resp.ok:
+                    raise NotOKError("TMDB raised an exception while fetching similar movies")
+
+                tmdb_resp_json = tmdb_resp.json()
+                results = tmdb_resp_json["results"]
+                results = [
+                    result
+                    for result in results
+                    if not movies_attributes.is_deleted(result["id"])
+                ]
+                results = results[:remaining_movies]
+                total_pages_available = tmdb_resp_json["total_pages"]
+
+                # Bookkeeping
+                remaining_movies -= len(results)
+                current_page += 1
+
+                # Append results
+                similar_movies.extend(results)
+
+            return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies)
         except (JSONDecodeError, KeyError) as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid or malformed response", 502)
         except NotOKError as e:
