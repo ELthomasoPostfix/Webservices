@@ -76,8 +76,6 @@ def require_movie_not_deleted(http_method: Callable):
 
     e.g. ::
 
-        deleted_movies = [1, 2, 3]
-
         @require_movie_not_deleted
         def get_movie_info(mov_id: int):
             return {
@@ -86,7 +84,7 @@ def require_movie_not_deleted(http_method: Callable):
             }
 
     .. function:: get_movie_info(mov_id: int)
-    In the previous code, calling :func:`add(2)` would result in the following response body with a status code of 404: ::
+    In the previous code, imagine that the movies `1, 2, 3` were deleted. Then, calling :func:`get_movie_info(2)` would result in the following response body with a status code of 404: ::
 
         {
             "error": "This movie resource does not exist",
