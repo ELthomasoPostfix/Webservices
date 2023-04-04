@@ -68,7 +68,7 @@ function onClick() {
     <!-- List of fetched movies -->
     <div v-else class="movie-grid">
       <div v-for="(value, index) in popular_x_data" :key="value.title">
-        <MovieCard class="grid-element" :title="`${index+1}. ${value.title}`"/>
+        <MovieCard class="grid-element" :movie="`${index+1}. ${value.title}`"/>
       </div>
     </div>
 </main>
