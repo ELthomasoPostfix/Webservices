@@ -43,6 +43,8 @@ class Movie(Resource):
             # Query TMDB API
             # Has Protection against change in pagecount during long query (large popularx)
             tmdb_resp = self.get_movie(movie_id=mov_id)
+            if tmdb_resp.status_code == 404:
+                return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
             if not tmdb_resp.ok:
                 raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
 
