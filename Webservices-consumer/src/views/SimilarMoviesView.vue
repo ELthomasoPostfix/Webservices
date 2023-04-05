@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, type Ref, onMounted } from "vue";
+import { ref, type Ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { isNumber, isNumeric } from "../code/utils";
 import type { Movie } from "../code/interfaces";
 
 import MainContentHeader from "@/components/MainContentHeader.vue";
+import HourglassLogo from "@/components/logos/HourglassLogo.vue"
 import MovieCard from "@/components/MovieCard.vue";
 import Movie404Card from "@/components/Movie404Card.vue";
 import MoviePlacedolderCard from "@/components/MoviePlaceholderCard.vue";
@@ -28,8 +29,16 @@ const reference_movie_data: Ref<Movie | undefined> = ref(undefined);
 /** Similar movies api response code */
 const similar_response_code: Ref<number> = ref(0);
 
-/** The response format of the `/movies` api endpoint. */
-interface MoviesResponse {
+/** The number of similar movies that are missing a runtime to fetch the runtime for */
+const runtime_fetch_amount: Ref<number> = ref(10);
+const is_updating_runtime: Ref<boolean> = ref(false);
+
+const runtime_updater_class = computed(() => {
+  return is_updating_runtime.value ? "runtime-updater-running" : "runtime-updater-idle"
+})
+
+/** The response format of the `/movies/<mov_id>/similar` api endpoint. */
+interface SimilarMoviesResponse {
   message: string;
   error?: string;
   result: Array<Movie>;
@@ -39,6 +48,13 @@ interface MoviesResponse {
     genres: Array<{ id: number }>,
     runtime: number | undefined
   };
+}
+
+/** The response format of the `/movies/<mov_id>` api endpoint. */
+interface MoviesResponse {
+  message: string;
+  error?: string;
+  result: Movie;
 }
 
 onMounted(() => {
@@ -68,7 +84,7 @@ function onClick() {
           console.log("Failed to fetch: status", response.status);
           return;
       }
-      response.json().then((response_json: MoviesResponse) => {
+      response.json().then((response_json: SimilarMoviesResponse) => {
         similar_movies_data.value = response_json["result"];
 
         const reference_movie_json = response_json["reference_movie"];
@@ -87,6 +103,36 @@ function onClick() {
       return;
   })
 
+}
+
+/** Fetch the primary movie info for X movies that are missing their runtime, to update their runtime */
+async function onClickRuntime() {
+  if (is_updating_runtime.value) return;
+
+  is_updating_runtime.value = true;
+  let updates_remaining: number = runtime_fetch_amount.value;
+
+  for (let index = 0; updates_remaining > 0 && index < similar_movies_data.value.length; index += 1) {
+    const movie: Movie = similar_movies_data.value[index];
+
+    if (movie.runtime !== undefined) continue;
+
+    await fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/${movie.id}`, {
+        credentials: "same-origin"
+      })
+    .then(async (response) => {
+        response.json().then((response_json: MoviesResponse) => {
+          movie.runtime = response_json["result"].runtime;
+        });
+        updates_remaining -= 1;
+    })
+    .catch((e) => {
+        console.log("Error during fetch: ", e);
+        return;
+    })
+  }
+
+  is_updating_runtime.value = false;
 }
 </script>
 
@@ -132,7 +178,14 @@ function onClick() {
       </div>
 
       <!-- Display the referenced movie -->
-      <h4>Reference Movie</h4>
+      <h4>
+        Reference Movie
+        <!-- Fetch missing runtime values -->
+        <HourglassLogo :class="runtime_updater_class"
+          :title="`Fetch the next ${runtime_fetch_amount} missing runtime values`"
+          @click="onClickRuntime"
+        />
+      </h4>
       <div class="movie-card-reference">
         <Movie404Card v-if="similar_response_code === 404" :movie-id="movie_id"/>
         <MoviePlacedolderCard v-else-if="reference_movie_data === undefined"/>
@@ -141,7 +194,8 @@ function onClick() {
 
       <!-- Display the fetched movies -->
       <h4>Similar Movies</h4>
-      <MovieGrid :movies-data="similar_movies_data"/>
+      <p v-if="similar_movies_data.length == 0" id="results-popularX">No results yet</p>
+      <MovieGrid v-else :movies-data="similar_movies_data"/>
     </div>
   </main>
 </template>
@@ -149,5 +203,29 @@ function onClick() {
 <style scoped>
 .movie-card-reference {
   margin-bottom: 1rem;
+}
+
+
+.runtime-updater-running {
+  animation-name: spin;
+  animation-duration: 5000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes spin {
+  from {
+      transform:rotate(0deg);
+  }
+  
+  to {
+      transform:rotate(360deg);
+  }
+}
+
+@media (hover: hover) {
+  .runtime-updater-idle:hover {
+    cursor: pointer;
+  }
 }
 </style>
