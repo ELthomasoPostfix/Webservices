@@ -13,7 +13,7 @@ defineProps<{
 
 <template>
     <div class="movie-grid">
-      <div v-for="(movie) in moviesData" :key="movie.title">
+      <div v-for="(movie) in moviesData" :key="movie.id">
         <MovieCard class="grid-element" :movie="movie"/>
       </div>
     </div>
