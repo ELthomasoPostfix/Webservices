@@ -1,6 +1,7 @@
+import collections
 import requests
 from json import JSONDecodeError
-from typing import List, Callable
+from typing import List, Callable, Set
 from flask_restful import Resource, reqparse, current_app
 import werkzeug
 
@@ -74,14 +75,24 @@ class SimilarityParameters(object):
         :param movie_id: The movie to select the genres from
         :return: The query substring
         """
+        # Get wanted movie genres
         tmdb_resp = Movie.get_movie(movie_id)
         if not tmdb_resp.ok:
             NotOKError("TMDB raised an exception while fetching a movie's primary information")
         tmdb_resp_json = tmdb_resp.json()
-        genre_ids: List[int] = [genre["id"] for genre in tmdb_resp_json["genres"]]
+        wanted_genre_ids: List[int] = [genre["id"] for genre in tmdb_resp_json["genres"]]
+        wanted_genre_ids = [str(id) for id in wanted_genre_ids]
 
-        genre_ids = [str(id) for id in genre_ids]
-        return f"with_genres={','.join(genre_ids)}"
+        # Get unwanted movie genres
+        tmdb_resp = Similar.get_movie_genres()
+        if not tmdb_resp.ok:
+            NotOKError("TMDB raised an exception while fetching all movie genres")
+        tmdb_resp_json = tmdb_resp.json()
+        unwanted_genre_ids: Set[int] = set([genre["id"] for genre in tmdb_resp_json["genres"]])
+        unwanted_genre_ids = set([str(id) for id in unwanted_genre_ids])
+        unwanted_genre_ids.difference_update(wanted_genre_ids)
+
+        return f"with_genres={','.join(wanted_genre_ids)}&without_genres={','.join(unwanted_genre_ids)}"
     
     @staticmethod
     def get_tmdb_runtime_query_substr(movie_id: int) -> str:
@@ -141,8 +152,21 @@ class Similar(Resource):
         return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={current_app.config['API_KEY_TMDB']}")
 
     @staticmethod
-    def get_discover_page(page: int, query_string: str):
+    def get_discover_page(page: int, query_string: str) -> requests.Response:
+        """Get a *page* of movies from the TMDB ``/discover/movie`` API.
+
+        :param page: Which page to retrieve
+        :return: The TMDB response, containing the list op discover movies if successful
+        """
         return requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}&page={page}")
+
+    @staticmethod
+    def get_movie_genres() -> requests.Response:
+        """Get all movie genres from the TMDB ``/genre/movie/list`` API.
+
+        :return: The TMDB response, containing the list op movie genres if successful
+        """
+        return requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={current_app.config['API_KEY_TMDB']}")
 
     @catch_unexpected_exceptions("find similar movies", True)
     @require_movie_not_deleted
@@ -171,6 +195,15 @@ class Similar(Resource):
                     raise RuntimeError(f"A valid and accepted Webservices similarity parameter, '{keyword}', is missing a TMDB query substring constructor implementation")
                 query_string += "&" + query_substr_constructor(mov_id)
             
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+            # TODO Respond with the query parameters to the frontend???
+
             while remaining_movies > 0 and current_page <= total_pages_available:
 
                 # Query TMDB API for similar movies
