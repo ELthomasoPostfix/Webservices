@@ -78,7 +78,7 @@ class SimilarityParameters(object):
         # Get wanted movie genres
         tmdb_resp = Movie.get_movie(movie_id)
         if not tmdb_resp.ok:
-            NotOKError("TMDB raised an exception while fetching a movie's primary information")
+            raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
         tmdb_resp_json = tmdb_resp.json()
         wanted_genre_ids: List[int] = [genre["id"] for genre in tmdb_resp_json["genres"]]
         wanted_genre_ids = [str(id) for id in wanted_genre_ids]
@@ -86,7 +86,7 @@ class SimilarityParameters(object):
         # Get unwanted movie genres
         tmdb_resp = Similar.get_movie_genres()
         if not tmdb_resp.ok:
-            NotOKError("TMDB raised an exception while fetching all movie genres")
+            raise NotOKError("TMDB raised an exception while fetching all movie genres")
         tmdb_resp_json = tmdb_resp.json()
         unwanted_genre_ids: Set[int] = set([genre["id"] for genre in tmdb_resp_json["genres"]])
         unwanted_genre_ids = set([str(id) for id in unwanted_genre_ids])
@@ -175,6 +175,14 @@ class Similar(Resource):
 
         :return: The similar movies
         """
+
+        tmdb_resp = Movie.get_movie(mov_id)
+        if tmdb_resp.status_code == 404:
+            return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
+        if not tmdb_resp.ok:
+            raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
+        subject_movie_json = tmdb_resp.json()
+
         from . import movies_attributes
         args = parser.parse_args()
         supplied_valid_arg_names = [argName for argName in SimilarityParameters.accepted_parameters() if args[argName] is not None]
@@ -194,15 +202,6 @@ class Similar(Resource):
                 if query_substr_constructor is None:
                     raise RuntimeError(f"A valid and accepted Webservices similarity parameter, '{keyword}', is missing a TMDB query substring constructor implementation")
                 query_string += "&" + query_substr_constructor(mov_id)
-            
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
-            # TODO Respond with the query parameters to the frontend???
 
             while remaining_movies > 0 and current_page <= total_pages_available:
 
@@ -228,7 +227,7 @@ class Similar(Resource):
                 # Append results
                 similar_movies.extend(results)
 
-            return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies)
+            return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies, reference_movie=subject_movie_json)
         except (JSONDecodeError, KeyError) as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid or malformed response", 502)
         except NotOKError as e:
