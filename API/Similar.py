@@ -155,10 +155,15 @@ class Similar(Resource):
     def get_discover_page(page: int, query_string: str) -> requests.Response:
         """Get a *page* of movies from the TMDB ``/discover/movie`` API.
 
+        Note that this function specifically fetches en-US translations.
+        If movies does not have one, then they may not show up in the query
+        results.
+
         :param page: Which page to retrieve
         :return: The TMDB response, containing the list op discover movies if successful
         """
-        return requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}&page={page}")
+        language: str = "en-US"
+        return requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}&page={page}&language={language}")
 
     @staticmethod
     def get_movie_genres() -> requests.Response:
