@@ -3,7 +3,7 @@
 
 import type { Movie } from '@/code/interfaces';
 
-import MovieCard from './MovieCard.vue';
+import MovieIconCard from './MovieIconCard.vue';
 
 defineProps<{
     /** The movie data to display inside individual movie cards. */
@@ -14,7 +14,7 @@ defineProps<{
 <template>
     <div class="movie-grid">
       <div v-for="(movie) in moviesData" :key="movie.id">
-        <MovieCard class="grid-element" :movie="movie"/>
+        <MovieIconCard class="grid-element" :movie="movie" v-bind="$attrs"/>
       </div>
     </div>
 </template>
