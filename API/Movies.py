@@ -97,6 +97,9 @@ class Movies(Resource):
                         if not movies_attributes.is_deleted(result["id"])
                     ]
                     results = results[:remaining_movies]
+                    for movie in results:
+                        movie_id: int = movie["id"]
+                        movie["liked"] = movies_attributes.is_liked(movie_id)
                     total_pages_available = tmdb_resp_json["total_pages"]
 
                     # Bookkeeping
