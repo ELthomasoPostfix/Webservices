@@ -8,4 +8,6 @@ export interface Movie {
     runtime?: number;
     /** The movie TMDB genre ids */
     genre_ids?: Array<number>;
+    /** The movie Webservices API like status */
+    liked: boolean;
 }

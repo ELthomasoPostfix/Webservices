@@ -5,7 +5,7 @@ import type { Movie } from "../code/interfaces";
 
 import MainContentHeader from "@/components/MainContentHeader.vue";
 import HourglassLogo from "@/components/logos/HourglassLogo.vue"
-import MovieCard from "@/components/MovieCard.vue";
+import MovieIconCard from "@/components/MovieIconCard.vue";
 import Movie404Card from "@/components/Movie404Card.vue";
 import MoviePlacedolderCard from "@/components/MoviePlaceholderCard.vue";
 import MovieGrid from "@/components/MovieGrid.vue";
@@ -49,6 +49,7 @@ interface SimilarMoviesResponse {
     id: number;
     genres: Array<{ id: number }>;
     runtime: number | undefined;
+    liked: boolean;
   };
   query_runtime?: {
     runtime: number;
@@ -72,13 +73,18 @@ interface MoviesResponse {
   result: Movie;
 }
 
-/** Fetch the first x similar movies and update the state variable upon success */
-function onClick() {
-  if (!isNumber(movie_id.value)) return;
+/** Clear all state variables related to similar movies functionality */
+function clearState() {
   similar_response_code.value = 0;
   similar_movies_data.value = [];
   reference_movie_data.value = undefined;
   similar_filter_properties.value = [];
+}
+
+/** Fetch the first x similar movies and update the state variable upon success */
+function onClick() {
+  if (!isNumber(movie_id.value)) return;
+  clearState();
 
   let query_string: string = "";
   if (matching_genres.value) query_string += "&matching_genres";
@@ -97,14 +103,15 @@ function onClick() {
       response.json().then((response_json: SimilarMoviesResponse) => {
         similar_movies_data.value = response_json["result"];
 
-        const reference_movie_json = response_json["reference_movie"];
+        const reference_movie_json = response_json.reference_movie;
         reference_movie_data.value = {
-          title: reference_movie_json["title"],
-          id: reference_movie_json["id"],
-          runtime: reference_movie_json["runtime"] === null ? undefined : reference_movie_json["runtime"],
-          genre_ids: reference_movie_json["genres"].map((genre: { id: number }) => {
+          title: reference_movie_json.title,
+          id: reference_movie_json.id,
+          runtime: reference_movie_json.runtime === null ? undefined : reference_movie_json.runtime,
+          genre_ids: reference_movie_json.genres.map((genre: { id: number }) => {
             return genre.id;
-          })
+          }),
+          liked: reference_movie_json.liked,
         };
 
 
@@ -173,6 +180,39 @@ async function onClickRuntime() {
 
   is_updating_runtime.value = false;
 }
+
+async function onTriggerLike(movie: Movie) {
+  const method: string = movie.liked ? "DELETE" : "PUT";
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/likes/${movie.id}`, {
+    method: method,
+    credentials: "same-origin"
+  })
+  .then(async (response) => {
+    if (response.status >= 400) return;
+
+
+    movie.liked = !movie.liked;
+  });
+}
+
+async function onTriggerDelete(movie: Movie) {
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/${movie.id}`, {
+    method: "DELETE",
+    credentials: "same-origin"
+  })
+  .then(async (response) => {
+
+    if (response.status >= 400) return;
+
+    if (movie.id === reference_movie_data.value?.id) {
+      clearState();
+      return;
+    }
+
+    similar_movies_data.value = similar_movies_data.value.filter((elem: Movie) => movie.id !== elem.id);
+
+  });
+}
 </script>
 
 <template>
@@ -226,7 +266,11 @@ async function onClickRuntime() {
       <div class="movie-card-reference">
         <Movie404Card v-if="similar_response_code === 404" :movie-id="movie_id"/>
         <MoviePlacedolderCard v-else-if="reference_movie_data === undefined"/>
-        <MovieCard v-else :movie="reference_movie_data"/>
+        <MovieIconCard v-else
+          :movie="reference_movie_data"
+          @delete="onTriggerDelete"
+          @like="onTriggerLike"
+        />
       </div>
 
       <h6>Filter properties</h6>
@@ -250,7 +294,11 @@ async function onClickRuntime() {
         />
       </h4>
       <p v-if="similar_movies_data.length == 0" id="results-popularX">No results yet</p>
-      <MovieGrid v-else :movies-data="similar_movies_data"/>
+      <MovieGrid v-else
+        :movies-data="similar_movies_data"
+        @delete="onTriggerDelete"
+        @like="onTriggerLike"
+      />
     </div>
   </main>
 </template>
