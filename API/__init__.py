@@ -58,6 +58,17 @@ class MoviesAttributes(dict[int, MovieAttributes]):
         """
         return not self.is_deleted(key)
 
+    def is_liked(self, key: int) -> bool:
+        """Check whether the movie corresponding to the key is liked.
+
+        If the key is not part of the dict, then `False` is returned.
+
+        :param key: The key to check the status for
+        :return: The movie's liked status
+        """
+        return key in self and self[key].liked
+
+
 movies_attributes: MoviesAttributes = MoviesAttributes()
 
 
