@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, type Ref, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
-import { isNumber, isNumeric } from "../code/utils";
+import { ref, type Ref, computed } from "vue";
+import { isNumber } from "../code/utils";
 import type { Movie } from "../code/interfaces";
 
 import MainContentHeader from "@/components/MainContentHeader.vue";
@@ -13,7 +12,7 @@ import MovieGrid from "@/components/MovieGrid.vue";
 
 
 /** Similar movies input state */
-const movie_id: Ref<number | undefined> = ref(undefined);
+const movie_id: Ref<number> = ref(0);
 const amount = ref(0);
 
 const matching_genres: Ref<boolean> = ref(false);
@@ -57,18 +56,12 @@ interface MoviesResponse {
   result: Movie;
 }
 
-onMounted(() => {
-    const route = useRoute();
-    let potential_movie_id: string = route.params.mov_id as string;
-
-    if (!isNumeric(potential_movie_id)) return;
-
-    movie_id.value = parseInt(potential_movie_id);
-})
-
 /** Fetch the first x similar movies and update the state variable upon success */
 function onClick() {
   if (!isNumber(movie_id.value)) return;
+  similar_response_code.value = 0;
+  similar_movies_data.value = [];
+  reference_movie_data.value = undefined;
 
   let query_string: string = "";
   if (matching_genres.value) query_string += "&matching_genres";
@@ -140,7 +133,12 @@ async function onClickRuntime() {
   <main>
     <!-- View header -->
     <MainContentHeader title="Similar"/>  
-    
+
+    <div>
+      <label for="input-similar-nav" style="padding-right: 1rem;">Selected movie is {{ movie_id }}. Select new movie</label>
+      <input style="margin-right: 1rem; min-width: 100px; max-width: 200px;" id="input-similar-nav" type="number" min="0" v-model="movie_id"/>
+    </div>
+
     <!-- View content -->
     <!-- Invalid movie id, fallthrough content -->
     <div v-if="movie_id === undefined">
@@ -178,14 +176,7 @@ async function onClickRuntime() {
       </div>
 
       <!-- Display the referenced movie -->
-      <h4>
-        Reference Movie
-        <!-- Fetch missing runtime values -->
-        <HourglassLogo :class="runtime_updater_class"
-          :title="`Fetch the next ${runtime_fetch_amount} missing runtime values`"
-          @click="onClickRuntime"
-        />
-      </h4>
+      <h4>Reference Movie</h4>
       <div class="movie-card-reference">
         <Movie404Card v-if="similar_response_code === 404" :movie-id="movie_id"/>
         <MoviePlacedolderCard v-else-if="reference_movie_data === undefined"/>
@@ -193,7 +184,14 @@ async function onClickRuntime() {
       </div>
 
       <!-- Display the fetched movies -->
-      <h4>Similar Movies</h4>
+      <h4>
+        Similar Movies
+        <!-- Fetch missing runtime values -->
+        <HourglassLogo :class="runtime_updater_class"
+          :title="`Fetch the next ${runtime_fetch_amount} missing runtime values`"
+          @click="onClickRuntime"
+        />
+      </h4>
       <p v-if="similar_movies_data.length == 0" id="results-popularX">No results yet</p>
       <MovieGrid v-else :movies-data="similar_movies_data"/>
     </div>
