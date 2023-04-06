@@ -129,7 +129,9 @@ class SimilarityParameters(object):
         if intermediate_value_store is not None:
             intermediate_value_store["query_runtime"] = {
                 "runtime": runtime,
-                "variance": variance
+                "variance": variance,
+                "lower_bound": lower_bound,
+                "upper_bound": upper_bound,
             }
 
         return f"with_runtime.gte={lower_bound}&with_runtime.lte={upper_bound}"
