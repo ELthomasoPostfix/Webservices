@@ -25,6 +25,9 @@ const similar_movies_data: Ref<Array<Movie>> = ref([]);
 /** Similar movies reference movie api result */
 const reference_movie_data: Ref<Movie | undefined> = ref(undefined);
 
+/** Similar filter properties, intermediate values used to query the TMDB API */
+const similar_filter_properties: Ref<Array<{ name: string, value: any }>> = ref([]);
+
 /** Similar movies api response code */
 const similar_response_code: Ref<number> = ref(0);
 
@@ -42,10 +45,23 @@ interface SimilarMoviesResponse {
   error?: string;
   result: Array<Movie>;
   reference_movie: {
-    title: string,
-    id: number,
-    genres: Array<{ id: number }>,
-    runtime: number | undefined
+    title: string;
+    id: number;
+    genres: Array<{ id: number }>;
+    runtime: number | undefined;
+  };
+  query_runtime?: {
+    runtime: number;
+    variance: number;
+    lower_bound: number;
+    upper_bound: number;
+  };
+  query_genres?: {
+    required: Array<number>;
+    excluded: Array<number>;
+  };
+  query_cast?: {
+    required: Array<number>;
   };
 }
 
@@ -62,6 +78,7 @@ function onClick() {
   similar_response_code.value = 0;
   similar_movies_data.value = [];
   reference_movie_data.value = undefined;
+  similar_filter_properties.value = [];
 
   let query_string: string = "";
   if (matching_genres.value) query_string += "&matching_genres";
@@ -89,6 +106,35 @@ function onClick() {
             return genre.id;
           })
         };
+
+
+        const props_runtime = response_json.query_runtime;
+        const props_cast = response_json.query_cast;
+        const props_genres = response_json.query_genres;
+
+        if (props_runtime !== undefined) {
+          similar_filter_properties.value.push({
+            name: "runtime range",
+            value: `${props_runtime.lower_bound} <= runtime <= ${props_runtime.upper_bound}`
+          })
+        }
+        if (props_cast !== undefined) {
+          similar_filter_properties.value.push({
+            name: "required overlapping actors (TMDB id)",
+            value: props_cast.required.join(", ")
+          })
+        }
+        if (props_genres !== undefined) {
+          similar_filter_properties.value.push({
+            name: "required genres (TMDB id)",
+            value: props_genres.required.join(", ")
+          })
+          similar_filter_properties.value.push({
+            name: "excluded genres (TMDB id)",
+            value: props_genres.excluded.join(", ")
+          })
+
+        }
       });
   })
   .catch((e) => {
@@ -182,6 +228,17 @@ async function onClickRuntime() {
         <MoviePlacedolderCard v-else-if="reference_movie_data === undefined"/>
         <MovieCard v-else :movie="reference_movie_data"/>
       </div>
+
+      <h6>Filter properties</h6>
+      <p>
+        The following filter properties were used to arrive at the Similar Movies results below:
+      </p>
+      <p v-if="similar_filter_properties.length === 0">No properties received ...</p>
+      <ul v-else>
+        <li v-for="(property) in similar_filter_properties" :key="property.name">
+          <b>{{ property.name }}:</b><br>
+          {{ property.value }}</li>
+      </ul>
 
       <!-- Display the fetched movies -->
       <h4>
