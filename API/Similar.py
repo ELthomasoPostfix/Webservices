@@ -44,7 +44,7 @@ class SimilarityParameters(object):
         }
 
     @staticmethod
-    def get_tmdb_actors_query_substr(movie_id: int) -> str:
+    def get_tmdb_actors_query_substr(movie_id: int, intermediate_value_store: dict=None) -> str:
         """Get the TMDB discovery api query substring for overlapping cast (actors).
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
@@ -52,6 +52,7 @@ class SimilarityParameters(object):
         status code.
         
         :param movie_id: The movie to select the actors from
+        :param intermediate_value_store: A value store to pass up intermediate values of construction the query substring
         :return: The query substring
         """
         tmdb_resp = Similar.get_credits(movie_id)
@@ -60,12 +61,16 @@ class SimilarityParameters(object):
         tmdb_resp_json = tmdb_resp.json()
         cast = tmdb_resp_json["cast"]
         actor_ids: List[int] = [person["id"] for person in cast]
-
         first_two_actors = [str(id) for id in actor_ids[:2]]
+        if intermediate_value_store is not None:
+            intermediate_value_store["query_cast"] = {
+                "required": [int(a_id) for a_id in first_two_actors],
+            }
+
         return f"with_cast={','.join(first_two_actors)}"
     
     @staticmethod
-    def get_tmdb_genres_query_substr(movie_id: int) -> str:
+    def get_tmdb_genres_query_substr(movie_id: int, intermediate_value_store: dict=None) -> str:
         """Get the TMDB discovery api query substring for matching genres.
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
@@ -73,6 +78,7 @@ class SimilarityParameters(object):
         status code.
 
         :param movie_id: The movie to select the genres from
+        :param intermediate_value_store: A value store to pass up intermediate values of construction the query substring
         :return: The query substring
         """
         # Get wanted movie genres
@@ -91,11 +97,16 @@ class SimilarityParameters(object):
         unwanted_genre_ids: Set[int] = set([genre["id"] for genre in tmdb_resp_json["genres"]])
         unwanted_genre_ids = set([str(id) for id in unwanted_genre_ids])
         unwanted_genre_ids.difference_update(wanted_genre_ids)
+        if intermediate_value_store is not None:
+            intermediate_value_store["query_genres"] = {
+                "required": [int(w_id) for w_id in wanted_genre_ids],
+                "excluded": [int(uw_id) for uw_id in unwanted_genre_ids]
+            }
 
         return f"with_genres={','.join(wanted_genre_ids)}&without_genres={','.join(unwanted_genre_ids)}"
     
     @staticmethod
-    def get_tmdb_runtime_query_substr(movie_id: int) -> str:
+    def get_tmdb_runtime_query_substr(movie_id: int, intermediate_value_store: dict=None) -> str:
         """Get the TMDB discovery api query substring for similar runtime.
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
@@ -103,6 +114,7 @@ class SimilarityParameters(object):
         status code.
 
         :param movie_id: The movie to select the runtime from
+        :param intermediate_value_store: A value store to pass up intermediate values of construction the query substring
         :return: The query substring
         """
         tmdb_resp = Movie.get_movie(movie_id)
@@ -111,8 +123,15 @@ class SimilarityParameters(object):
         tmdb_resp_json = tmdb_resp.json()
         runtime: int = tmdb_resp_json["runtime"]
 
-        lower_bound: int = runtime - 10
-        upper_bound: int = runtime + 10
+        variance: int = 10
+        lower_bound: int = runtime - variance
+        upper_bound: int = runtime + variance
+        if intermediate_value_store is not None:
+            intermediate_value_store["query_runtime"] = {
+                "runtime": runtime,
+                "variance": variance
+            }
+
         return f"with_runtime.gte={lower_bound}&with_runtime.lte={upper_bound}"
 
 
@@ -197,6 +216,10 @@ class Similar(Resource):
         total_pages_available: int = 1
         current_page: int = 1
 
+        # Store intermediate values produced during the dicover
+        # API querying, to pass along to the frontend for expressiveness
+        intermediate_values_store: dict = {}
+
         try:
             query_string: str = ""
             substring_constructors = SimilarityParameters.function_mapping()
@@ -206,7 +229,7 @@ class Similar(Resource):
                 query_substr_constructor = substring_constructors.get(keyword, None)
                 if query_substr_constructor is None:
                     raise RuntimeError(f"A valid and accepted Webservices similarity parameter, '{keyword}', is missing a TMDB query substring constructor implementation")
-                query_string += "&" + query_substr_constructor(mov_id)
+                query_string += "&" + query_substr_constructor(mov_id, intermediate_values_store)
 
             while remaining_movies > 0 and current_page <= total_pages_available:
 
@@ -232,7 +255,7 @@ class Similar(Resource):
                 # Append results
                 similar_movies.extend(results)
 
-            return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies, reference_movie=subject_movie_json)
+            return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies, reference_movie=subject_movie_json, **intermediate_values_store)
         except (JSONDecodeError, KeyError) as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid or malformed response", 502)
         except NotOKError as e:
