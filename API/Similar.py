@@ -199,6 +199,7 @@ class Similar(Resource):
 
         :return: The similar movies
         """
+        from . import movies_attributes
 
         tmdb_resp = Movie.get_movie(mov_id)
         if tmdb_resp.status_code == 404:
@@ -206,8 +207,8 @@ class Similar(Resource):
         if not tmdb_resp.ok:
             raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
         subject_movie_json = tmdb_resp.json()
+        subject_movie_json["liked"] = movies_attributes.is_liked(mov_id)
 
-        from . import movies_attributes
         args = parser.parse_args()
         supplied_valid_arg_names = [argName for argName in SimilarityParameters.accepted_parameters() if args[argName] is not None]
         remaining_movies: int = args["amount"]
