@@ -15,6 +15,7 @@ defineProps<{
         {{ movie.title }}
       </div>
     </h6>
+    <slot name="middle"></slot>
     <!-- Card content -->
     <div class="movie-card-body ">
       <p>
