@@ -1,9 +1,7 @@
-import collections
 import requests
 from json import JSONDecodeError
 from typing import List, Callable, Set
 from flask_restful import Resource, reqparse, current_app
-import werkzeug
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKError
@@ -145,7 +143,7 @@ parser.add_argument(SimilarityParameters.GENRES, required=False, location=('args
 parser.add_argument(SimilarityParameters.RUNTIME, required=False, location=('args',),
                     help="Get the movies whose runtime is similar to the subject movie")
 parser.add_argument('amount', required=True, type=int, location=('args',),
-                    help="Get the amount of movies similar to the subject movie")
+                    help="Get *amount* of movies similar to the subject movie")
 
 
 
@@ -248,6 +246,9 @@ class Similar(Resource):
                     if not movies_attributes.is_deleted(result["id"])
                 ]
                 results = results[:remaining_movies]
+                for movie in results:
+                    movie_id: int = movie["id"]
+                    movie["liked"] = movies_attributes.is_liked(movie_id)
                 total_pages_available = tmdb_resp_json["total_pages"]
 
                 # Bookkeeping
