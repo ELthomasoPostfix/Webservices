@@ -40,6 +40,7 @@ class Movie(Resource):
         :return: The movie's primary information
         """
         try:
+            from . import movies_attributes
             # Query TMDB API
             # Has Protection against change in pagecount during long query (large popularx)
             tmdb_resp = self.get_movie(movie_id=mov_id)
@@ -48,7 +49,9 @@ class Movie(Resource):
             if not tmdb_resp.ok:
                 raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
 
-            return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp.json())
+            tmdb_resp_json=tmdb_resp.json()
+            tmdb_resp_json["liked"] = movies_attributes.is_liked(mov_id)
+            return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp_json)
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
         except NotOKError as e:
