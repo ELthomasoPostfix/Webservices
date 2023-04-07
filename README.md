@@ -153,6 +153,9 @@ This, I created a [vuejs](https://vuejs.org/guide/introduction.html) project bas
 
 The frontend and backend api components are standalone, so without CORS enabled any frontend fetches to the backend fail. CORS is simply implemented using the flask-cors package in this project.
 
+## Python Decorators
+
+To elegantly handle unexpected exceptions and common input requirements, I chose to make use of decorators. These can be wrapped around the http methods to semi-explicitly describe the error-behavior of the relevant endpoints. Decorators that take parameters and still examine and pass down the wrapped function's parameters gave me some trouble, but the following links helped in finding the solution: [SO answer](https://stackoverflow.com/questions/5929107/decorators-with-parameters), [sitepoint article](https://www.sitepoint.com/understanding-python-decorators/)
 
 # Secrets and Configuration
 
