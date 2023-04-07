@@ -147,9 +147,9 @@ openssl req -new -x509 -keyout Web/generated/key.pem -out Web/generated/server.p
 > /dev/null
 ```
 
-However, this attempt was abandoned because the certificate was not signed by a trusted authorits, making browsers like chrome flag and reject to visit the frontend pages.
+However, this attempt was abandoned because the certificate was not signed by a trusted authority, making browsers like chrome flag and reject to visit the frontend pages.
 
-This, I created a [vuejs](https://vuejs.org/guide/introduction.html) project based on vite, which provides a builtin development http server by default, to serve the frontend instead.
+Thus, I created a [vuejs](https://vuejs.org/guide/introduction.html) project based on vite, which provides a builtin development http server by default, to serve the frontend instead.
 
 The frontend and backend api components are standalone, so without CORS enabled any frontend fetches to the backend fail. CORS is simply implemented using the flask-cors package in this project.
 
