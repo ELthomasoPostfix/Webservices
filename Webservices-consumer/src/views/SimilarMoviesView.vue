@@ -37,7 +37,7 @@ const is_updating_runtime: Ref<boolean> = ref(false);
 
 const runtime_updater_class = computed(() => {
   return is_updating_runtime.value ? "runtime-updater-running" : "runtime-updater-idle"
-})
+});
 
 /** The response format of the `/movies/<mov_id>/similar` api endpoint. */
 interface SimilarMoviesResponse {
@@ -200,10 +200,10 @@ async function onTriggerDelete(movie: Movie) {
     <!-- View header -->
     <MainContentHeader title="Similar"/>  
 
-    <div>
-      <label for="input-similar-nav" style="padding-right: 1rem;">Selected movie is {{ movie_id }}. Select new movie</label>
+    <form @submit.prevent="onClick">
+      <label for="input-similar-nav" style="padding-right: 1rem;">Choose the reference movie by TMDB id</label>
       <input style="margin-right: 1rem; min-width: 100px; max-width: 200px;" id="input-similar-nav" type="number" min="0" v-model="movie_id"/>
-    </div>
+    </form>
 
     <!-- View content -->
     <!-- Invalid movie id, fallthrough content -->
@@ -218,7 +218,9 @@ async function onTriggerDelete(movie: Movie) {
       >
         <label for="input-similar-amount" style="padding-right: 1rem;">First X similar movies</label>
         <input style="margin-right: 1rem; min-width: 100px; max-width: 200px;" id="input-similar-amount" type="number" min="0" v-model="amount"/>
-        <button id="button-similar-amount" @click="onClick">Get similar {{ amount }}</button>
+        <button id="button-similar-amount" @click="onClick"
+          :title="`Get the first ${amount} movies similar to the reference movie with TMDB id ${movie_id}`"
+        >Get similar {{ amount }}</button>
       </form>
 
       <!-- Select the similarity keywords to modify the TMDB query -->
@@ -257,7 +259,7 @@ async function onTriggerDelete(movie: Movie) {
       <p>
         The following filter properties were used to arrive at the Similar Movies results below:
       </p>
-      <p v-if="similar_filter_properties.length === 0">No properties received ...</p>
+      <p v-if="similar_filter_properties.length === 0">No properties received yet ...</p>
       <ul v-else>
         <li v-for="(property) in similar_filter_properties" :key="property.name">
           <b>{{ property.name }}:</b><br>
