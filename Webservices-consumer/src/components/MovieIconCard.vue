@@ -26,12 +26,30 @@ const like_icon_fill = computed(() => {
 /** The like/unlike functionality event trigger */
 async function onClickLike() {
   if (props.movie.liked === undefined) return;
-  emit("like", props.movie);
+
+  const method: string = props.movie.liked ? "DELETE" : "PUT";
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/likes/${props.movie.id}`, {
+    method: method,
+    credentials: "same-origin"
+  })
+  .then(async (response) => {
+    if (response.status >= 400) return;
+
+    emit("like", props.movie);
+  });
 }
 
 /** The delete functionality event trigger */
 async function onClickDelete() {
-  emit("delete", props.movie);
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/${props.movie.id}`, {
+    method: "DELETE",
+    credentials: "same-origin"
+  })
+  .then(async (response) => {
+    if (response.status >= 400) return;
+
+    emit("delete", props.movie);
+  });
 }
 </script>
 

@@ -182,36 +182,16 @@ async function onClickRuntime() {
 }
 
 async function onTriggerLike(movie: Movie) {
-  const method: string = movie.liked ? "DELETE" : "PUT";
-  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/likes/${movie.id}`, {
-    method: method,
-    credentials: "same-origin"
-  })
-  .then(async (response) => {
-    if (response.status >= 400) return;
-
-
-    movie.liked = !movie.liked;
-  });
+  movie.liked = !movie.liked;
 }
 
 async function onTriggerDelete(movie: Movie) {
-  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/${movie.id}`, {
-    method: "DELETE",
-    credentials: "same-origin"
-  })
-  .then(async (response) => {
-
-    if (response.status >= 400) return;
-
-    if (movie.id === reference_movie_data.value?.id) {
+  if (movie.id === reference_movie_data.value?.id) {
       clearState();
       return;
-    }
+  }
 
-    similar_movies_data.value = similar_movies_data.value.filter((elem: Movie) => movie.id !== elem.id);
-
-  });
+  similar_movies_data.value = similar_movies_data.value.filter((elem: Movie) => movie.id !== elem.id);
 }
 </script>
 
