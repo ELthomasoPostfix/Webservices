@@ -9,6 +9,7 @@ from .Movie import Movie
 from .Likes import Likes
 from .Like import Like
 from .Similar import Similar
+from .AverageScorePlot import AverageScorePlot
 
 from .MovieAttributes import MovieAttributes
 
@@ -110,5 +111,6 @@ def create_app(test_config: Mapping[str, Any]=None):
     api.add_resource(Likes, Likes.route() + '/')
     api.add_resource(Like, Like.route())
     api.add_resource(Similar, Similar.route() + '/')
+    api.add_resource(AverageScorePlot, AverageScorePlot.route())
 
     return app
