@@ -113,7 +113,7 @@ class Movies(Resource):
 
             return make_response_message(E_MSG.SUCCESS, 200, result=result)
         except JSONDecodeError as e:
-            return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
+            return make_response_error(E_MSG.ERROR, E_TMDB.ERROR_JSON_DECODE, 502)
         except NotOKTMDB as e:
             return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)
 
