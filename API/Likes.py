@@ -27,7 +27,7 @@ class Likes(Resource):
         :return: The list of all liked movies' TMDB ids, ``[]`` by default
         """
         from . import movies_attributes
-        non_deleted_keys: List[int] = movies_attributes.filter_valid_non_deleted_keys(movies_attributes.keys())
-        liked_movies: List[int] = [movie_id for movie_id in non_deleted_keys if movies_attributes[movie_id].liked]
+        non_deleted_keys: List[int] = movies_attributes.prune_deleted_keys(movies_attributes.keys())
+        liked_movies: List[int] = [movie_id for movie_id in non_deleted_keys if movies_attributes.is_liked(movie_id)]
         return make_response_message(E_MSG.SUCCESS, 200, result=liked_movies)
 
