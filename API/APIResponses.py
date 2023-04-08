@@ -8,6 +8,10 @@ class GenericResponseMessages:
     UNEXPECTED = "Encountered an unexpected exception"
     MALFORMED_REQ = "Malformed request"
 
+class TMDBResponseMessages:
+    """A class of constants that specifies response messages specifically for TMDB"""
+    NOT_OK = "TMDB raised an exception"
+
 
 def make_response_message(message: str, status_code: int, **kwargs) -> Response:
     """A simple wrapper for the Flask make_response function with
