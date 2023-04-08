@@ -30,13 +30,13 @@ class MoviesAttributes(dict[int, MovieAttributes]):
     and 7. ((un)like movies) described in the project
     root's README.
     """
-    def filter_valid_non_deleted_keys(self, keys: Iterable[int]) -> List[int]:
-        """Filter the iterable of keys and keep only the existing keys with a deleted prop value of `False`.
+    def prune_deleted_keys(self, keys: Iterable[int]) -> List[int]:
+        """Filter the iterable of keys and keep only the keys that have a 'deleted' status of `False`.
 
         :param keys: The list of keys to filter
-        :return: The list of filtered keys
+        :return: The list of non-deleted keys
         """
-        return [key for key in keys if key in self and not self.is_deleted(key)]
+        return [key for key in keys if self.not_deleted(key)]
     
     def is_deleted(self, key: int) -> bool:
         """Check whether the movie corresponding to the key is deleted.
