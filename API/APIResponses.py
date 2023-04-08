@@ -13,6 +13,10 @@ class TMDBResponseMessages:
     NOT_OK = "TMDB raised an exception"
     ERROR_JSON_DECODE = "TMDB gave an invalid response"
 
+class QuickchartResponseMessages:
+    """A class of constants that specifies response messages specifically for quickchart"""
+    NOT_OK = "quickchart raised an exception"
+
 
 def make_response_message(message: str, status_code: int, **kwargs) -> Response:
     """A simple wrapper for the Flask make_response function with
