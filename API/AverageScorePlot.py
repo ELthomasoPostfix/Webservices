@@ -65,8 +65,7 @@ class AverageScorePlot(Resource):
     def get(self):
         """The fetch endpoint of the average movie score barplot of a collection of Movie resources.
 
-        Silently prunes deleted movie ids from the query string, but specifies which movie ids were
-        pruned in the response.
+        Silently prunes deleted movie ids from the query string.
 
         :return: The average movie score barplot
         """
