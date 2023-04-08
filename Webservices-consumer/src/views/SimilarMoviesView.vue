@@ -181,17 +181,28 @@ async function onClickRuntime() {
   is_updating_runtime.value = false;
 }
 
+/** Event handler for the 'like' event.
+ *
+ * Update the like status of this page's movies state.
+ * @param movie The movie to update the liked state of
+ */
 async function onTriggerLike(movie: Movie) {
   movie.liked = !movie.liked;
 }
 
+/** Event handler for the 'delete' event.
+ *
+ * Update this page's movies state by removing the deleted movie.
+ * @param movie The movie to remove from the page's movies state
+ */
 async function onTriggerDelete(movie: Movie) {
   if (movie.id === reference_movie_data.value?.id) {
       clearState();
       return;
   }
 
-  similar_movies_data.value = similar_movies_data.value.filter((elem: Movie) => movie.id !== elem.id);
+
+  similar_movies_data.value.splice(similar_movies_data.value.indexOf(movie), 1);
 }
 </script>
 
