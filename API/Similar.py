@@ -4,9 +4,9 @@ from typing import List, Callable, Set
 from flask_restful import Resource, reqparse, current_app
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
-from .exceptions import NotOKError
+from .exceptions import NotOKTMDB
 from .Movie import Movie
-from .APIResponses import GenericResponseMessages as E_MSG, make_response_error, make_response_message
+from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
 
 
 class SimilarityParameters(object):
@@ -46,7 +46,7 @@ class SimilarityParameters(object):
         """Get the TMDB discovery api query substring for overlapping cast (actors).
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
-        from TMDB. May raise a `NotOKError` if the TMDB response has an invalid
+        from TMDB. May raise a `NotOKTMDB` exception if the TMDB response has an invalid
         status code.
         
         :param movie_id: The movie to select the actors from
@@ -55,7 +55,7 @@ class SimilarityParameters(object):
         """
         tmdb_resp = Similar.get_credits(movie_id)
         if not tmdb_resp.ok:
-            raise NotOKError("TMDB raised an exception while fetching a movie's credits")
+            raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
         cast = tmdb_resp_json["cast"]
         actor_ids: List[int] = [person["id"] for person in cast]
@@ -72,7 +72,7 @@ class SimilarityParameters(object):
         """Get the TMDB discovery api query substring for matching genres.
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
-        from TMDB. May raise a `NotOKError` if the TMDB response has an invalid
+        from TMDB. May raise a `NotOKTMDB` exception if the TMDB response has an invalid
         status code.
 
         :param movie_id: The movie to select the genres from
@@ -82,7 +82,7 @@ class SimilarityParameters(object):
         # Get wanted movie genres
         tmdb_resp = Movie.get_movie(movie_id)
         if not tmdb_resp.ok:
-            raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
+            raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
         wanted_genre_ids: List[int] = [genre["id"] for genre in tmdb_resp_json["genres"]]
         wanted_genre_ids = [str(id) for id in wanted_genre_ids]
@@ -90,7 +90,7 @@ class SimilarityParameters(object):
         # Get unwanted movie genres
         tmdb_resp = Similar.get_movie_genres()
         if not tmdb_resp.ok:
-            raise NotOKError("TMDB raised an exception while fetching all movie genres")
+            raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
         unwanted_genre_ids: Set[int] = set([genre["id"] for genre in tmdb_resp_json["genres"]])
         unwanted_genre_ids = set([str(id) for id in unwanted_genre_ids])
@@ -108,7 +108,7 @@ class SimilarityParameters(object):
         """Get the TMDB discovery api query substring for similar runtime.
 
         May raise a `KeyError` or a `JSONDecodeError` in case of an erroneous response
-        from TMDB. May raise a `NotOKError` if the TMDB response has an invalid
+        from TMDB. May raise a `NotOKTMDB` exception if the TMDB response has an invalid
         status code.
 
         :param movie_id: The movie to select the runtime from
@@ -117,7 +117,7 @@ class SimilarityParameters(object):
         """
         tmdb_resp = Movie.get_movie(movie_id)
         if not tmdb_resp.ok:
-            raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
+            raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
         runtime: int = tmdb_resp_json["runtime"]
 
@@ -192,7 +192,7 @@ class Similar(Resource):
         """
         return requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={current_app.config['API_KEY_TMDB']}")
 
-    @catch_unexpected_exceptions("find similar movies", True)
+    @catch_unexpected_exceptions("find similar movies")
     @require_movie_not_deleted
     def get(self, mov_id: int):
         """The query endpoint of the collection of movies similar to the specified movie.
@@ -200,28 +200,27 @@ class Similar(Resource):
         :return: The similar movies
         """
         from . import movies_attributes
-
-        tmdb_resp = Movie.get_movie(mov_id)
-        if tmdb_resp.status_code == 404:
-            return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
-        if not tmdb_resp.ok:
-            raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
-        subject_movie_json = tmdb_resp.json()
-        subject_movie_json["liked"] = movies_attributes.is_liked(mov_id)
-
-        args = parser.parse_args()
-        supplied_valid_arg_names = [argName for argName in SimilarityParameters.accepted_parameters() if args[argName] is not None]
-        remaining_movies: int = args["amount"]
-
-        similar_movies = []
-        total_pages_available: int = 1
-        current_page: int = 1
-
-        # Store intermediate values produced during the dicover
-        # API querying, to pass along to the frontend for expressiveness
-        intermediate_values_store: dict = {}
-
         try:
+            tmdb_resp = Movie.get_movie(mov_id)
+            if tmdb_resp.status_code == 404:
+                return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
+            if not tmdb_resp.ok:
+                raise NotOKTMDB()
+            subject_movie_json = tmdb_resp.json()
+            subject_movie_json["liked"] = movies_attributes.is_liked(mov_id)
+
+            args = parser.parse_args()
+            supplied_valid_arg_names = [argName for argName in SimilarityParameters.accepted_parameters() if args[argName] is not None]
+            remaining_movies: int = args["amount"]
+
+            similar_movies = []
+            total_pages_available: int = 1
+            current_page: int = 1
+
+            # Store intermediate values produced during the dicover
+            # API querying, to pass along to the frontend for expressiveness
+            intermediate_values_store: dict = {}
+
             query_string: str = ""
             substring_constructors = SimilarityParameters.function_mapping()
 
@@ -237,7 +236,7 @@ class Similar(Resource):
                 # Query TMDB API for similar movies
                 tmdb_resp = self.get_discover_page(current_page, query_string)
                 if not tmdb_resp.ok:
-                    raise NotOKError("TMDB raised an exception while fetching similar movies")
+                    raise NotOKTMDB()
 
                 tmdb_resp_json = tmdb_resp.json()
                 results = tmdb_resp_json["results"]
@@ -262,5 +261,5 @@ class Similar(Resource):
             return make_response_message(E_MSG.SUCCESS, 200, result=similar_movies, reference_movie=subject_movie_json, **intermediate_values_store)
         except (JSONDecodeError, KeyError) as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid or malformed response", 502)
-        except NotOKError as e:
-            return make_response_error(E_MSG.ERROR, str(e), 502)
+        except NotOKTMDB as e:
+            return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)

@@ -20,7 +20,7 @@ class Likes(Resource):
         """
         return "/likes"
 
-    @catch_unexpected_exceptions("fetch the Likes collection", True)
+    @catch_unexpected_exceptions("fetch the Likes collection")
     def get(self):
         """The query endpoint of the collection of all likes.
 

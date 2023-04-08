@@ -3,10 +3,10 @@ import requests
 from flask_restful import Resource, current_app
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
-from .exceptions import NotOKError
+from .exceptions import NotOKTMDB
 from .MovieAttributes import MovieAttributes
 from .Movies import Movies
-from .APIResponses import GenericResponseMessages as E_MSG, make_response_error, make_response_message
+from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
 
 
 class Movie(Resource):
@@ -47,17 +47,17 @@ class Movie(Resource):
             if tmdb_resp.status_code == 404:
                 return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
             if not tmdb_resp.ok:
-                raise NotOKError("TMDB raised an exception while fetching a movie's primary information")
+                raise NotOKTMDB()
 
             tmdb_resp_json=tmdb_resp.json()
             tmdb_resp_json["liked"] = movies_attributes.is_liked(mov_id)
             return make_response_message(E_MSG.SUCCESS, 200, result=tmdb_resp_json)
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, "TMDB gave an invalid response", 502)
-        except NotOKError as e:
-            return make_response_error(E_MSG.ERROR, str(e), 502)
+        except NotOKTMDB as e:
+            return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)
 
-    @catch_unexpected_exceptions("delete a movie", True)
+    @catch_unexpected_exceptions("delete a movie")
     @require_movie_not_deleted
     def delete(self, mov_id: int):
         """The delete endpoint for a single, specific movie resource.
