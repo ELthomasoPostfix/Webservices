@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref, computed } from "vue";
+import { ref, type Ref, computed, reactive } from "vue";
 import type { Movie } from "../code/interfaces";
 
 import MainContentHeader from "@/components/MainContentHeader.vue";
@@ -7,14 +7,14 @@ import MovieGrid from "@/components/MovieGrid.vue";
 
 
 /** Popular x input state */
-const popular_x = ref(0);
+const popular_x: Ref<number> = ref(0);
 
 /** Popular x api results */
-const popular_x_data: Ref<Array<Movie>> = ref([]);
+const popular_x_data: Array<Movie> = reactive([]);
 
 /** Transformed popular x api results, suitable to be displayed */
 const displayable_data = computed(() => {
-  return popular_x_data.value.map((elem: Movie, index: number) => {
+  return popular_x_data.map((elem: Movie, index: number) => {
     return {
       ...elem,
       title: `${index+1}. ${elem.title}`
@@ -50,14 +50,33 @@ function onClick() {
         const result = response_json["result"];
 
         /** Unpack response data */
-        if ("popularx" in result) popular_x_data.value = result.popularx!;
+        if (result.popularx !== undefined) {
+          popular_x_data.splice(0);
+          popular_x_data.push(...result.popularx);
+        }
       });
   })
   .catch((e) => {
       console.log("Error during fetch: ", e);
       return;
   })
+}
 
+/** Event handler for the 'like' event.
+ *
+ * Update the like status of this page's movies state.
+ * @param movie The movie to update the liked state of
+ */async function onTriggerLike(movie: Movie) {
+  popular_x_data[displayable_data.value.indexOf(movie)].liked = !movie.liked;
+}
+
+/** Event handler for the 'delete' event.
+ *
+ * Update this page's movies state by removing the deleted movie.
+ * @param movie The movie to remove from the page's movies state
+ */
+async function onTriggerDelete(movie: Movie) {
+  popular_x_data.splice(displayable_data.value.indexOf(movie), 1);
 }
 </script>
 
@@ -75,7 +94,11 @@ function onClick() {
       <button id="button-popularX" @click="onClick">Get popular {{ popular_x_repr_string }}</button>
     </form>
 
-    <p v-if="popular_x_data.length == 0" id="results-popularX">No results yet</p>
-    <MovieGrid v-else :movies-data="displayable_data"/>
-  </main>
+    <p v-if="displayable_data.length == 0" id="results-popularX">No results yet</p>
+    <MovieGrid v-else
+      :movies-data="displayable_data"
+      @delete="onTriggerDelete"
+      @like="onTriggerLike"
+    />
+</main>
 </template>
