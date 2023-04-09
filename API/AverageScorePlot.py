@@ -61,7 +61,7 @@ class AverageScorePlot(Resource):
         }
         return requests.get(f"https://quickchart.io/chart?c={chart}")
 
-    @catch_unexpected_exceptions("query the similar score barchart collection", True)
+    @catch_unexpected_exceptions("query the similar score barchart collection")
     def get(self):
         """The fetch endpoint of the average movie score barplot of a collection of Movie resources.
 
