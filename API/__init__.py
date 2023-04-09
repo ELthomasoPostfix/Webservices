@@ -12,6 +12,7 @@ from .Similar import Similar
 from .AverageScorePlot import AverageScorePlot
 
 from .MovieAttributes import MovieAttributes
+from .APIResponses import CustomHeaders
 
 
 class MoviesAttributes(dict[int, MovieAttributes]):
@@ -85,7 +86,7 @@ def create_app(test_config: Mapping[str, Any]=None):
     # create and configure the app
     app = Flask(__name__)
     CORS(app, expose_headers=[
-        "Excluded-Movie-IDs"
+        CustomHeaders.EXCLUDED_MOVIE_IDS
     ])
 
 
