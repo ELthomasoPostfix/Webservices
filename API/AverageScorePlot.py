@@ -5,11 +5,12 @@ from requests.exceptions import JSONDecodeError
 from flask_restful import Resource, reqparse
 from typing import List, Tuple, Set
 
+
 from .Movies import Movies
-from .Movie import Movie
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB, NotOKQuickchart
-from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, QuickchartResponseMessages as E_QC
+from .APIResponses import make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, QuickchartResponseMessages as E_QC
+from .APIClients import TMDBClient
 
 
 """The query arguments passed to this endpoint facilitate
@@ -83,7 +84,7 @@ class AverageScorePlot(Resource):
 
             movies_data: List[Tuple[str, int]] = []
             for valid_movie_id in valid_movie_ids:
-                tmdb_resp = Movie.get_movie(valid_movie_id)
+                tmdb_resp = TMDBClient.get_movie(valid_movie_id)
                 tmdb_resp_json = tmdb_resp.json()
 
                 if tmdb_resp.status_code == 404:
