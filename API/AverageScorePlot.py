@@ -78,6 +78,7 @@ class AverageScorePlot(Resource):
                 return make_response_error(E_MSG.ERROR, f"The {movie_ids_param_name} query param should be a comma separated list of TMDB ids (positive integers)", 400)
             unique_movie_ids: Set[int] = set([int(movie_id) for movie_id in movie_ids if movie_id != ""])
             valid_movie_ids: List[int] = movies_attributes.prune_deleted_keys(unique_movie_ids)
+            resolved_movie_ids: Set[int] = set()
 
             movies_data: List[Tuple[str, int]] = []
             for valid_movie_id in valid_movie_ids:
@@ -90,6 +91,7 @@ class AverageScorePlot(Resource):
                 if not tmdb_resp.ok:
                     raise NotOKTMDB()
 
+                resolved_movie_ids.add(valid_movie_id)
                 movies_data.append((
                     f"{tmdb_resp_json['title']} ({tmdb_resp_json['id']})",
                     tmdb_resp_json["vote_average"]
@@ -101,7 +103,9 @@ class AverageScorePlot(Resource):
             if not quickchart_resp.ok:
                 raise NotOKQuickchart()
 
-            return send_file(barchart_file, mimetype="image/webp")
+            response = send_file(barchart_file, mimetype="image/webp")
+            response.headers["Excluded-Movie-IDs"] = ','.join([str(id) for id in set(unique_movie_ids).difference(resolved_movie_ids)])
+            return response
         except JSONDecodeError as e:
             return make_response_error(E_MSG.ERROR, E_TMDB.ERROR_JSON_DECODE, 502)
         except NotOKTMDB as e:
