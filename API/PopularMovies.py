@@ -1,6 +1,5 @@
-import requests
 from requests.exceptions import JSONDecodeError
-from flask_restful import Resource, reqparse, current_app
+from flask_restful import Resource, reqparse
 
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB
@@ -9,7 +8,7 @@ from .APIClients import TMDBClient
 from .Movies import Movies
 
 
-class MoviesParameters(object):
+class PopularMoviesParameters(object):
     """An enum of the parameters used by the PopularMovies resource.
 
     For descriptions of the parameters, refer to the help argument
@@ -23,14 +22,14 @@ popular movies.
 
 The query parameters correspond to the required project features
 in the following way:
-    * MoviesParameters.amount: 1.
+    * PopularMoviesParameters.amount: 1.
 
 The feature numbers (i.e. 'x.') refer to the features in the
 same order as they are listed in the Project Specification
 section of the README.
 """
 parser = reqparse.RequestParser()
-parser.add_argument(MoviesParameters.amount, type=int, required=True, location=('args',),
+parser.add_argument(PopularMoviesParameters.amount, type=int, required=True, location=('args',),
                     help="The amount of popular movies, as a positive integer")
 
 
@@ -54,11 +53,11 @@ class PopularMovies(Resource):
         args = parser.parse_args()
         try:
             from . import movies_attributes
-            popular_x: int = args[MoviesParameters.amount]
+            popular_x: int = args[PopularMoviesParameters.amount]
 
             if popular_x < 0:
                 return make_response_error(E_MSG.MALFORMED_REQ,
-                                            f"The {MoviesParameters.amount} parameter must be positive",
+                                            f"The {PopularMoviesParameters.amount} parameter must be positive",
                                             400)
 
             # Setup
