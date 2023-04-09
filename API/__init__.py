@@ -5,6 +5,7 @@ from typing import Iterable, Mapping, Any, List
 
 from .API import API
 from .Movies import Movies
+from .PopularMovies import PopularMovies
 from .Movie import Movie
 from .Likes import Likes
 from .Like import Like
@@ -111,6 +112,7 @@ def create_app(test_config: Mapping[str, Any]=None):
 
     api.add_resource(API, API.route())
     api.add_resource(Movies, Movies.route() + '/')
+    api.add_resource(PopularMovies, PopularMovies.route())
     api.add_resource(Movie, Movie.route())
     api.add_resource(Likes, Likes.route() + '/')
     api.add_resource(Like, Like.route())
