@@ -84,11 +84,14 @@ class AverageScorePlot(Resource):
                 tmdb_resp = Movie.get_movie(valid_movie_id)
                 tmdb_resp_json = tmdb_resp.json()
 
+                if tmdb_resp.status_code == 404:
+                    continue
+
                 if not tmdb_resp.ok:
                     raise NotOKTMDB()
 
                 movies_data.append((
-                    tmdb_resp_json["title"],
+                    f"{tmdb_resp_json['title']} ({tmdb_resp_json['id']})",
                     tmdb_resp_json["vote_average"]
                 ))
 
