@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, type Ref, computed } from "vue";
+import { isNumeric } from "@/code/utils";
 
 import MainContentHeader from "../components/MainContentHeader.vue";
 
 /** The array of movie ids to plot */
 const movie_ids: Ref<Set<number>> = ref(new Set());
-const movie_ids_list = computed(() => {
+const movie_ids_list_repr = computed(() => {
   return [...movie_ids.value];
 })
+
+/** The movie ids that have been rejected by the Webservices API */
+const movie_ids_rejected: Ref<Set<number>> = ref(new Set());
 
 /** A potential movie id to add to the fetch */
 const new_movie_id: Ref<number> = ref(0);
@@ -20,13 +24,25 @@ const image_object_url = computed(() => {
 
 /** Fetch an average score barplot for the specified movie ids */
 async function onClick() {
-  const movie_ids_string: string = movie_ids_list.value.join(",");
+  const movie_ids_string: string = movie_ids_list_repr.value.join(",");
   fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/average-score-plot?movie_ids=${movie_ids_string}`)
   .then(async (response) => {        
       const header_ct = response.headers.get("Content-Type");
+      const header_emi = response.headers.get("Excluded-Movie-IDs");
 
       if (response.status >= 400) return;
       if (header_ct !== "image/webp") return;
+
+      if (header_emi !== null) {
+        const excluded_ids = header_emi.split(',');
+        excluded_ids.forEach((rejected_id: string) => {
+          if (!isNumeric(rejected_id)) return;
+          const rejected_id_num: number = parseInt(rejected_id);
+
+          movie_ids_rejected.value.add(rejected_id_num);
+          movie_ids.value.delete(rejected_id_num);
+        })
+      }
 
       return response.blob()
   })
@@ -37,6 +53,8 @@ async function onClick() {
 
 /** Add the currently selected movie id to the plot query */
 function onSelectMovie() {
+  if (movie_ids_rejected.value.has(new_movie_id.value)) return;
+
   movie_ids.value.add(new_movie_id.value);
 }
 
@@ -59,20 +77,36 @@ function onDeselectMovie(movie_id: number) {
         <button id="button-plot-ids" @click="onSelectMovie">Add {{ new_movie_id }}</button>
       </form>
   
+      <!-- Selected movie ids -->
       <p style="margin-top: 1rem;">
         The following TMDB movie ids will used to construct a vote average barplot:
       </p>
 
-      <p v-if="movie_ids_list.length === 0"
+      <p v-if="movie_ids_list_repr.length === 0"
         style="padding-left: 1rem;"
       >
         Selection is empty ...
       </p>
       <div v-else>
         <button v-for="(movie_id) in movie_ids"
-          class="movies-selection-btn"
+          class="movies-selection-btn-list movies-selection-btn"
           :key="movie_id"
           @click="onDeselectMovie(movie_id)"
+        >
+          {{ movie_id }}
+        </button>
+      </div>
+    
+      <!-- Rejected movie ids -->
+      <div v-if="movie_ids_rejected.size > 0">
+        <p style="margin-top: 1rem;">
+          The following TMDB movie ids have been rejected by the Webservices API. They are either deleted or don't exist:
+        </p>
+
+        <button v-for="(movie_id) in movie_ids_rejected"
+          disabled
+          class="movies-selection-btn-list"
+          :key="movie_id"
         >
           {{ movie_id }}
         </button>
@@ -90,7 +124,7 @@ function onDeselectMovie(movie_id: number) {
       <div>
         <img v-if="image_object_url !== undefined"
           :src="image_object_url"
-          :alt="`Average score barplot for TMDB movie ids: ${movie_ids.size > 0 ? movie_ids_list.join(', ') : 'no ids chosen'}`"
+          :alt="`Average score barplot for TMDB movie ids: ${movie_ids.size > 0 ? movie_ids_list_repr.join(', ') : 'no ids chosen'}`"
         >
         <p v-else
           style="padding-left: 1rem; margin-top: 1em;"
@@ -107,7 +141,7 @@ function onDeselectMovie(movie_id: number) {
   margin-bottom: 1rem;
 }
 
-.movies-selection-btn {
+.movies-selection-btn-list {
   margin-right: 2px;
 }
 
