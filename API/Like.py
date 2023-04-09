@@ -1,10 +1,9 @@
 from flask_restful import Resource
 
-from API.MovieAttributes import MovieAttributes
-
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .Likes import Likes
-from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG
+from .MovieAttributes import MovieAttributes
+from .APIResponses import make_response_message, GenericResponseMessages as E_MSG
 
 
 class Like(Resource):

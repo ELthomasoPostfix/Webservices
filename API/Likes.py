@@ -1,9 +1,8 @@
 from typing import List
 from flask_restful import Resource
 
-from API.utils import catch_unexpected_exceptions
-
-from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG
+from .utils import catch_unexpected_exceptions
+from .APIResponses import make_response_message, GenericResponseMessages as E_MSG
 
 
 class Likes(Resource):
