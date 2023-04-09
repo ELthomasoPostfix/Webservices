@@ -27,7 +27,7 @@ for the specified list of movies.
 
 The query parameters correspond to the required project features
 in the following way:
-    * movie_ids: 5.
+    * PlotParameters.movie_ids: 5.
 
 The feature numbers (i.e. 'x.') refer to the features in the
 same order as they are listed in the Project Specification
