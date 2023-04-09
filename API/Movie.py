@@ -1,12 +1,12 @@
 from json import JSONDecodeError
-import requests
-from flask_restful import Resource, current_app
+from flask_restful import Resource
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKTMDB
 from .MovieAttributes import MovieAttributes
 from .Movies import Movies
 from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
+from .APIClients import TMDBClient
 
 
 class Movie(Resource):
@@ -23,15 +23,6 @@ class Movie(Resource):
         """
         return f"{Movies.route()}/<int:mov_id>"
 
-    @staticmethod
-    def get_movie(movie_id: int) -> requests.Response:
-        """Get the primary information about a movie from the TMDB ``/movie/{movie_id}`` API.
-
-        :param movie_id: Which movie's information to retrieve
-        :return: The TMDB response, containing the requested movie if successful
-        """
-        return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={current_app.config['API_KEY_TMDB']}")
-
     @catch_unexpected_exceptions("fetch a movie's primary information")
     @require_movie_not_deleted
     def get(self, mov_id: int):
@@ -43,7 +34,7 @@ class Movie(Resource):
             from . import movies_attributes
             # Query TMDB API
             # Has Protection against change in pagecount during long query (large popularx)
-            tmdb_resp = self.get_movie(movie_id=mov_id)
+            tmdb_resp = TMDBClient.get_movie(movie_id=mov_id)
             if tmdb_resp.status_code == 404:
                 return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
             if not tmdb_resp.ok:

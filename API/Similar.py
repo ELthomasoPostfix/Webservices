@@ -1,12 +1,12 @@
-import requests
 from json import JSONDecodeError
 from typing import List, Callable, Set
-from flask_restful import Resource, reqparse, current_app
+from flask_restful import Resource, reqparse
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKTMDB
 from .Movie import Movie
 from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
+from .APIClients import TMDBClient
 
 
 class SimilarityParameters(object):
@@ -53,7 +53,7 @@ class SimilarityParameters(object):
         :param intermediate_value_store: A value store to pass up intermediate values of construction the query substring
         :return: The query substring
         """
-        tmdb_resp = Similar.get_credits(movie_id)
+        tmdb_resp = TMDBClient.get_credits(movie_id)
         if not tmdb_resp.ok:
             raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
@@ -80,7 +80,7 @@ class SimilarityParameters(object):
         :return: The query substring
         """
         # Get wanted movie genres
-        tmdb_resp = Movie.get_movie(movie_id)
+        tmdb_resp = TMDBClient.get_movie(movie_id)
         if not tmdb_resp.ok:
             raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
@@ -88,7 +88,7 @@ class SimilarityParameters(object):
         wanted_genre_ids = [str(id) for id in wanted_genre_ids]
 
         # Get unwanted movie genres
-        tmdb_resp = Similar.get_movie_genres()
+        tmdb_resp = TMDBClient.get_movie_genres()
         if not tmdb_resp.ok:
             raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
@@ -115,7 +115,7 @@ class SimilarityParameters(object):
         :param intermediate_value_store: A value store to pass up intermediate values of construction the query substring
         :return: The query substring
         """
-        tmdb_resp = Movie.get_movie(movie_id)
+        tmdb_resp = TMDBClient.get_movie(movie_id)
         if not tmdb_resp.ok:
             raise NotOKTMDB()
         tmdb_resp_json = tmdb_resp.json()
@@ -161,37 +161,6 @@ class Similar(Resource):
         """
         return f"{Movie.route()}/similar"
 
-    @staticmethod
-    def get_credits(movie_id: int) -> requests.Response:
-        """Get the crew and cast for the specified movie from the TMDB ``/movie/{movie_id}/credits`` API.
-
-        :param movie_id: Which movie get the credits for
-        :return: The TMDB response, containing the credits if successful
-        """
-        return requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={current_app.config['API_KEY_TMDB']}")
-
-    @staticmethod
-    def get_discover_page(page: int, query_string: str) -> requests.Response:
-        """Get a *page* of movies from the TMDB ``/discover/movie`` API.
-
-        Note that this function specifically fetches en-US translations.
-        If movies does not have one, then they may not show up in the query
-        results.
-
-        :param page: Which page to retrieve
-        :return: The TMDB response, containing the list op discover movies if successful
-        """
-        language: str = "en-US"
-        return requests.get(f"https://api.themoviedb.org/3/discover/movie?api_key={current_app.config['API_KEY_TMDB']}{query_string}&page={page}&language={language}")
-
-    @staticmethod
-    def get_movie_genres() -> requests.Response:
-        """Get all movie genres from the TMDB ``/genre/movie/list`` API.
-
-        :return: The TMDB response, containing the list op movie genres if successful
-        """
-        return requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={current_app.config['API_KEY_TMDB']}")
-
     @catch_unexpected_exceptions("find similar movies")
     @require_movie_not_deleted
     def get(self, mov_id: int):
@@ -201,7 +170,7 @@ class Similar(Resource):
         """
         from . import movies_attributes
         try:
-            tmdb_resp = Movie.get_movie(mov_id)
+            tmdb_resp = TMDBClient.get_movie(mov_id)
             if tmdb_resp.status_code == 404:
                 return make_response_error(E_MSG.ERROR, f"The movie resource, {mov_id}, does not exist", 404)
             if not tmdb_resp.ok:
@@ -234,7 +203,7 @@ class Similar(Resource):
             while remaining_movies > 0 and current_page <= total_pages_available:
 
                 # Query TMDB API for similar movies
-                tmdb_resp = self.get_discover_page(current_page, query_string)
+                tmdb_resp = TMDBClient.get_discover_page(current_page, query_string)
                 if not tmdb_resp.ok:
                     raise NotOKTMDB()
 

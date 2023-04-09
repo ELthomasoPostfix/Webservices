@@ -1,10 +1,10 @@
-import requests
 from requests.exceptions import JSONDecodeError
-from flask_restful import Resource, reqparse, current_app
+from flask_restful import Resource, reqparse
 
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB
 from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB
+from .APIClients import TMDBClient
 
 
 class MoviesParameters(object):
@@ -45,15 +45,6 @@ class Movies(Resource):
         """
         return "/movies"
 
-    @staticmethod
-    def get_popular_page(page: int) -> requests.Response:
-        """Get a *page* of popular movies from the TMDB ``/movie/popular`` API.
-        
-        :param page: Which page to retrieve
-        :return: The TMDB response, containing the list op popular movies if successful
-        """
-        return requests.get(f"https://api.themoviedb.org/3/movie/popular?page={page}&api_key={current_app.config['API_KEY_TMDB']}")
-
     @catch_unexpected_exceptions("query the Movies collection")
     def get(self):
         """The filter/search endpoint of the collection of all movies.
@@ -84,7 +75,7 @@ class Movies(Resource):
 
                 while remaining_movies > 0 and current_page <= total_pages_available:
                     # Query TMDB API
-                    tmdb_resp = self.get_popular_page(page=current_page)
+                    tmdb_resp = TMDBClient.get_popular_page(page=current_page)
 
                     if not tmdb_resp.ok:
                         raise NotOKTMDB()
