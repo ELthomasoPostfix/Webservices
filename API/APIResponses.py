@@ -1,6 +1,10 @@
 from flask import make_response, Response
 
 
+class CustomHeaders:
+    EXCLUDED_MOVIE_IDS = "Excluded-Movie-IDs"
+
+
 class GenericResponseMessages:
     """A class of constants used to construct response messages."""
     SUCCESS    = "Success"
