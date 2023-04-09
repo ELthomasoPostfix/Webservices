@@ -1,6 +1,7 @@
 import requests
 
 from flask_restful import current_app
+from typing import List, Tuple
 
 
 class TMDBClient:
@@ -62,3 +63,34 @@ class TMDBClient:
         :return: The TMDB response, containing the list op movie genres if successful
         """
         return requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={current_app.config['API_KEY_TMDB']}")
+
+
+class QuickchartClient:
+    """A simple quickchart client to make API calls to the quickchart API.
+
+    No instance of this class is required, as no API key required.
+    This class purely provides static methods to access the quickchart API.
+    
+    This custom class is absolutely necessary instead of a package
+    because I forgot API client packages exist.
+    """
+    @staticmethod
+    def get_barplot(movies_data: List[Tuple[str, int]]) -> requests.Response:
+        """Get a barplot from the quickchart ``/chart`` API.
+        
+        :param movies_data: The movies' data to plot, of the format `[ (label, avg. score), ...]`
+        :return: The quickchart response, containing the barplot if successful
+        """
+        chart: dict = {
+            "type": "bar",
+            "data": {
+                "labels": [ data[0] for data in movies_data ],
+                "datasets": [
+                    {
+                        "label": 'Vote Avg.',
+                        "data": [ data[1] for data in movies_data ]
+                    }
+                ]
+            }
+        }
+        return requests.get(f"https://quickchart.io/chart?c={chart}")

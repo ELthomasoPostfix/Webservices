@@ -10,7 +10,7 @@ from .Movies import Movies
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB, NotOKQuickchart
 from .APIResponses import make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, QuickchartResponseMessages as E_QC
-from .APIClients import TMDBClient
+from .APIClients import TMDBClient, QuickchartClient
 
 
 """The query arguments passed to this endpoint facilitate
@@ -40,27 +40,6 @@ class AverageScorePlot(Resource):
         :return: The route string
         """
         return f"{Movies.route()}/average-score-plot"
-
-    @staticmethod
-    def get_barplot(movies_data: List[Tuple[str, int]]) -> requests.Response:
-        """Get a barplot from the quickchart ``/chart`` API.
-        
-        :param movies_data: The movies' data to plot, of the format `[ (label, avg. score), ...]`
-        :return: The quickchart response, containing the barplot if successful
-        """
-        chart: dict = {
-            "type": "bar",
-            "data": {
-                "labels": [ data[0] for data in movies_data ],
-                "datasets": [
-                    {
-                        "label": 'Vote Avg.',
-                        "data": [ data[1] for data in movies_data ]
-                    }
-                ]
-            }
-        }
-        return requests.get(f"https://quickchart.io/chart?c={chart}")
 
     @catch_unexpected_exceptions("query the similar score barchart collection")
     def get(self):
@@ -99,7 +78,7 @@ class AverageScorePlot(Resource):
                     tmdb_resp_json["vote_average"]
                 ))
 
-            quickchart_resp = AverageScorePlot.get_barplot(movies_data)
+            quickchart_resp = QuickchartClient.get_barplot(movies_data)
             barchart_file: BytesIO = BytesIO(quickchart_resp.content)
 
             if not quickchart_resp.ok:
