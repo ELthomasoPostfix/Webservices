@@ -26,7 +26,12 @@ const router = createRouter({
       path: '/movies/similar',
       name: 'similar',
       component: () => import('../views/SimilarMoviesView.vue')
-    }
+    },
+    {
+      path: '/movies/plot',
+      name: 'plot',
+      component: () => import('../views/PlotView.vue')
+    },
   ]
 })
 

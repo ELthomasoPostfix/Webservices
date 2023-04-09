@@ -12,6 +12,7 @@ import ExternalsAccreditation from './components/ExternalsAccreditation.vue';
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/movies">Movies</RouterLink>
         <RouterLink to="/movies/similar">Similar</RouterLink>
+        <RouterLink to="/movies/plot">Plot</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
