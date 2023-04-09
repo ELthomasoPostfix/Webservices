@@ -29,16 +29,17 @@ const popular_x_repr_string = computed(() => {
 
 /** The response format of the `/movies` api endpoint. */
 interface MoviesResponse {
-  message: string,
-  error?: string,
-  result: {
-    popularx?: Array<Movie>
-  },
+  /** A message that can be displayed to the user */
+  message: string;
+  /** A developer/debug error message */
+  error?: string;
+  /** The requested movies */
+  result: Array<Movie>;
 }
 
 /** Fetch the first x popular movies and update the state variable upon success */
 function onClick() {
-  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/?popularx=${popular_x.value}`, {
+  fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/movies/popular?amount=${popular_x.value}`, {
       credentials: "same-origin"
     })
   .then(async (response) => {
@@ -50,10 +51,8 @@ function onClick() {
         const result = response_json["result"];
 
         /** Unpack response data */
-        if (result.popularx !== undefined) {
-          popular_x_data.splice(0);
-          popular_x_data.push(...result.popularx);
-        }
+        popular_x_data.splice(0);
+        popular_x_data.push(...result);
       });
   })
   .catch((e) => {
