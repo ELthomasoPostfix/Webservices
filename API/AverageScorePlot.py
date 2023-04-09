@@ -1,5 +1,4 @@
 from io import BytesIO
-import requests
 from flask import send_file
 from requests.exceptions import JSONDecodeError
 from flask_restful import Resource, reqparse
@@ -12,6 +11,15 @@ from .exceptions import NotOKTMDB, NotOKQuickchart
 from .APIResponses import make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, QuickchartResponseMessages as E_QC
 from .APIClients import TMDBClient, QuickchartClient
 
+
+class PlotParameters:
+    """An enum of the parameters used by the AverageScorePlot resource to
+    provide average score plots.
+
+    For descriptions of the parameters, refer to the help argument
+    specified in their addition as arguments to the reqparser below.
+    """
+    movie_ids = "movie_ids"
 
 """The query arguments passed to this endpoint facilitate
 features related to constructing a barplot of average scores
@@ -26,7 +34,7 @@ same order as they are listed in the Project Specification
 section of the README
 """
 parser = reqparse.RequestParser()
-parser.add_argument("movie_ids", type=str, required=True, location=('args',),
+parser.add_argument(PlotParameters.movie_ids, type=str, required=True, location=('args',),
                     help="A comma-separated list of TMDB movie ids")
 
 
@@ -51,12 +59,11 @@ class AverageScorePlot(Resource):
         :return: The average movie score barplot
         """
         args = parser.parse_args()
-        movie_ids_param_name: str = "movie_ids"
         try:
             from . import movies_attributes
-            movie_ids: List[str] = args[movie_ids_param_name].split(',')
+            movie_ids: List[str] = args[PlotParameters.movie_ids].split(',')
             if any((movie_id != "" and not movie_id.isnumeric() for movie_id in movie_ids)):
-                return make_response_error(E_MSG.ERROR, f"The {movie_ids_param_name} query param should be a comma separated list of TMDB ids (positive integers)", 400)
+                return make_response_error(E_MSG.ERROR, f"The {PlotParameters.movie_ids} query param should be a comma separated list of TMDB ids (positive integers)", 400)
             unique_movie_ids: Set[int] = set([int(movie_id) for movie_id in movie_ids if movie_id != ""])
             valid_movie_ids: List[int] = movies_attributes.prune_deleted_keys(unique_movie_ids)
             resolved_movie_ids: Set[int] = set()
