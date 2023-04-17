@@ -22,7 +22,7 @@ class Like(Resource):
         """
         return f"{Likes.route()}/<int:mov_id>"
 
-    @catch_unexpected_exceptions("fetch a Like resource", True)
+    @catch_unexpected_exceptions("fetch a Like resource")
     @require_movie_not_deleted
     def get(self, mov_id: int):
         """The query endpoint of a specific like.
