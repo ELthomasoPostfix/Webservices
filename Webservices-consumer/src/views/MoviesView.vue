@@ -73,7 +73,18 @@ async function onTriggerDelete(movie: Movie) {
 <template>
   <main>
     <!-- View header -->
-    <MainContentHeader title="Movies"/>
+    <MainContentHeader title="Movies List"/>
+
+    <p>
+      This page consumes the <b>/api/movies</b> Webservices endpoint, which represents the collection of all movies TMDB has to offer.
+      The Webservices API does this by calling the TMDB discover API with minimal query parameters, as TMDB does not provide an easy way to
+      get all of its movies.
+    </p>
+
+    <p>
+      The <b>/api/movies</b> Webservices endpoint is <em>not</em> part of the project requirements.
+      It is consumed by the frontend simply to demonstrate the Webservices API structure.
+    </p>
 
     <!-- View content -->
     <form @submit.prevent=""

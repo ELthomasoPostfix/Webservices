@@ -67,7 +67,16 @@ function onDeselectMovie(movie_id: number) {
 <template>
   <main>
     <!-- View header -->
-    <MainContentHeader title="Plot"/>
+    <MainContentHeader title="Average Score Plot"/>
+
+    <p>
+      This page consumes the <b>/api/movies/average-score-plot</b> Webservices endpoint, which represents a plot of the TMDB vote average values of the specified movies.
+      The Webservices API does this by calling the TMDB API to collect the vite averages and then the quickchart API to generate the plot.
+    </p>
+
+    <p>
+      The <b>/api/movies/average-score-plot</b> Webservices endpoint <em>is</em> part of the project requirements.
+    </p>
 
     <!-- Movies selection -->
     <div class="plot-input-container">

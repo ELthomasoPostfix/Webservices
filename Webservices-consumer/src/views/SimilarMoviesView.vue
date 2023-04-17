@@ -209,7 +209,16 @@ async function onTriggerDelete(movie: Movie) {
 <template>
   <main>
     <!-- View header -->
-    <MainContentHeader title="Similar"/>  
+    <MainContentHeader title="Similar Movies List"/>
+
+    <p>
+      This page consumes the <b>/api/movies/similar</b> Webservices endpoint, which represents the collection of all movies similar to the reference movie, based on the movie characteristics specified below, that TMDB has to offer.
+      The Webservices API does this by calling the TMDB discover API with zero or more query parameters.
+    </p>
+
+    <p>
+      The <b>/api/movies/similar</b> Webservices endpoint <em>is</em> part of the project requirements.
+    </p>
 
     <form @submit.prevent="onClick">
       <label for="input-similar-nav" style="padding-right: 1rem;">Choose the reference movie by TMDB id</label>

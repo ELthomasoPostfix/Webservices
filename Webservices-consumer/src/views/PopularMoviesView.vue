@@ -83,7 +83,16 @@ async function onTriggerDelete(movie: Movie) {
 <template>
   <main>
     <!-- View header -->
-    <MainContentHeader title="Movies"/>
+    <MainContentHeader title="Popular Movies List"/>
+
+    <p>
+      This page consumes the <b>/api/movies/popular</b> Webservices endpoint, which represents the collection of <b>popular</b> movies TMDB has to offer.
+      The Webservices API does this by calling the TMDB popular API.
+    </p>
+
+    <p>
+      The <b>/api/movies/popular</b> Webservices endpoint <em>is</em> part of the project requirements.
+    </p>
 
     <!-- View content -->
     <form @submit.prevent=""
