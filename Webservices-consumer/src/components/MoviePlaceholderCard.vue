@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
 import PlaceholderRect from './PlaceholderRect.vue';
+
+const props = defineProps<{
+  /**  */
+  width: Number;
+}>();
+
+const width_style = computed(() => {
+  return `max-width: ${props.width}px`;
+})
 </script>
 
 <template>
-  <div class="movie-card">
+  <div class="movie-card" :style="width_style">
     <!-- Card header -->
     <h6 class="movie-card-title">
       <PlaceholderRect :width="70" :height="20"/>
