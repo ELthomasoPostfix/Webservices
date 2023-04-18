@@ -1,15 +1,17 @@
 from io import BytesIO
 from flask import send_file
+import marshmallow
 from requests.exceptions import JSONDecodeError
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
 from typing import List, Tuple, Set
-
+from flask_apispec import MethodResource, marshal_with, doc
 
 from .Movies import Movies
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB, NotOKQuickchart
 from .APIResponses import make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, QuickchartResponseMessages as E_QC
 from .APIClients import TMDBClient, QuickchartClient
+from .schemaModels import generate_params_from_parser
 
 
 class PlotParameters:
@@ -38,7 +40,7 @@ parser.add_argument(PlotParameters.movie_ids, type=str, required=True, location=
                     help="A comma-separated list of TMDB movie ids")
 
 
-class AverageScorePlot(Resource):
+class AverageScorePlot(MethodResource):
     """The api endpoint that represents a barplot of average movie scores resource.
     """
     @staticmethod
@@ -49,6 +51,10 @@ class AverageScorePlot(Resource):
         """
         return f"{Movies.route()}/average-score-plot"
 
+    @doc(description='A barplot of average score values',
+         params=generate_params_from_parser(parser),
+         content_type='application/octet-stream')
+    @marshal_with(marshmallow.fields.Raw, code=(200, 400, 502))
     @catch_unexpected_exceptions("query the similar score barchart collection")
     def get(self):
         """The fetch endpoint of the average movie score barplot of a collection of Movie resources.
