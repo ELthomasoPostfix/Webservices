@@ -1,11 +1,13 @@
+from flask_apispec import MethodResource, marshal_with, doc
 from typing import List
-from flask_restful import Resource
 
 from .utils import catch_unexpected_exceptions
 from .APIResponses import make_response_message, GenericResponseMessages as E_MSG
+from .schemaModels import LikesSchema
 
 
-class Likes(Resource):
+
+class Likes(MethodResource):
     """The api endpoint that represents the collection of all like resources.
 
     A like is simply a TMDB movie id, linked to a boolean describing whether
@@ -19,11 +21,14 @@ class Likes(Resource):
         """
         return "/likes"
 
+    @doc(description="""The simplified collection of all Like resources.
+    The "liked" resource is comprised solely of a status boolean, so a list of all movies with a \"liked\" status of True is returned.""")
+    @marshal_with(LikesSchema, code=200)
     @catch_unexpected_exceptions("fetch the Likes collection")
     def get(self):
         """The query endpoint of the collection of all likes.
 
-        :return: The list of all liked movies' TMDB ids, ``[]`` by default
+        :return: A LikesSchema instance
         """
         from . import movies_attributes
         non_deleted_keys: List[int] = movies_attributes.prune_deleted_keys(movies_attributes.keys())

@@ -1,12 +1,13 @@
-from flask_restful import Resource
+from flask_apispec import MethodResource, marshal_with, doc
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .Likes import Likes
 from .MovieAttributes import MovieAttributes
 from .APIResponses import make_response_message, GenericResponseMessages as E_MSG
+from .schemaModels import WebservicesResponseSchema, LikeSchema
 
 
-class Like(Resource):
+class Like(MethodResource):
     """The api endpoint that represents a single like resource.
 
     A like is simply a TMDB movie id, linked to a boolean describing whether
@@ -22,6 +23,8 @@ class Like(Resource):
         """
         return f"{Likes.route()}/<int:mov_id>"
 
+    @doc(description='Get a single Like resource, which represents the "liked" status of a movie.')
+    @marshal_with(LikeSchema, code=200)
     @catch_unexpected_exceptions("fetch a Like resource")
     @require_movie_not_deleted
     def get(self, mov_id: int):
@@ -37,12 +40,14 @@ class Like(Resource):
 
         return make_response_message(E_MSG.SUCCESS, 200, id=mov_id, liked=liked)
     
+    @doc(description='Set a single Like resource\'s "liked" status to True.')
+    @marshal_with(WebservicesResponseSchema, code=201)
     @catch_unexpected_exceptions("set a Like resource to true")
     @require_movie_not_deleted
     def put(self, mov_id: int):
         """The setter endpoint of a specific like.
 
-        :return: None
+        :return: A simple success or error message
         """
         from . import movies_attributes
 
@@ -53,12 +58,14 @@ class Like(Resource):
 
         return make_response_message(E_MSG.SUCCESS, 201)
 
+    @doc(description='Set a single Like resource\'s "liked" status to False.')
+    @marshal_with(WebservicesResponseSchema, code=200)
     @catch_unexpected_exceptions("set a Like resource to false")
     @require_movie_not_deleted
     def delete(self, mov_id: int):
         """The delete endpoint of a specific like. This endpoint sets the resource to false.
 
-        :return: None
+        :return: A simple success or error message
         """
         from . import movies_attributes
 

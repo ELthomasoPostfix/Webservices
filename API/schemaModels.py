@@ -12,3 +12,16 @@ class WebservicesResultSchema(WebservicesResponseSchema):
     result = fields.List(fields.Raw, required=True, default=[], metadata={
         'description': 'A generic list of results',
     })
+
+class LikeSchema(WebservicesResponseSchema):
+    id = fields.Integer(required=True, metadata={
+        'description': 'The TMDB movie id to get the "liked" status of',
+    })
+    liked = fields.Boolean(required=True, metadata={
+        'description': 'The "liked" status of the specified movie',
+    })
+
+class LikesSchema(WebservicesResultSchema):
+    result = fields.List(fields.Integer, required=True, default=[], metadata={
+        'description': 'The list of TMDB movie ids with a "liked" status of True',
+    })
