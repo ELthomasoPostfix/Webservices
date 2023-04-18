@@ -16,21 +16,23 @@ def to_params_type(python_type: Type | Callable) -> str:
     Special consideration is taken for the Callable type. This
     is because the default value of an argument's type param for
     the reqparser is the identity lambda function. If the type is
-    a Callable type OR a Callable instance, then 'null' is
+    a Callable *instance*, then 'null' is
     returned instead.
 
     :param python_type: The python type to convert
     :return: The apispec param type string
     """
-    if python_type is Callable or isinstance(python_type, Callable):
-        return "null"
-
     valid_type_mapping = {
         int: "integer",
         str: "string",
         bool: "boolean",
     }
-    return valid_type_mapping.get(python_type, "unknown type")
+    if python_type in valid_type_mapping:
+        return valid_type_mapping[python_type]
+    elif isinstance(python_type, Callable):
+        return "null"
+    else:
+        return "unknown type"
 
 def generate_params_from_parser(parser: reqparse.RequestParser) -> dict:
     """Generate a dict of query parameters that can be passed to the params arg of apispec's doc decorator.
