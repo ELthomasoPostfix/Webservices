@@ -1,9 +1,9 @@
 from flask_restful import reqparse
 from marshmallow import Schema, fields, validates, ValidationError
-from typing import Type
+from typing import Callable, Type
 
 
-def to_params_type(python_type: Type) -> str:
+def to_params_type(python_type: Type | Callable) -> str:
     """Convert a python type to an apispec params type string.
 
     The apispec params type string can be passed to the @doc
@@ -13,13 +13,22 @@ def to_params_type(python_type: Type) -> str:
     Returns a default value, 'unknown type', if the *python_type* is not recognized.
     Valid python types are int, str and bool.
 
+    Special consideration is taken for the Callable type. This
+    is because the default value of an argument's type param for
+    the reqparser is the identity lambda function. If the type is
+    a Callable type OR a Callable instance, then 'null' is
+    returned instead.
+
     :param python_type: The python type to convert
     :return: The apispec param type string
     """
+    if python_type is Callable or isinstance(python_type, Callable):
+        return "null"
+
     valid_type_mapping = {
         int: "integer",
         str: "string",
-        bool: "boolean"
+        bool: "boolean",
     }
     return valid_type_mapping.get(python_type, "unknown type")
 
