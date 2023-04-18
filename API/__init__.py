@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api as RESTAPI
+from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
 from typing import Iterable, Mapping, Any, List
 
@@ -118,5 +119,10 @@ def create_app(test_config: Mapping[str, Any]=None):
     api.add_resource(Like, Like.route())
     api.add_resource(Similar, Similar.route() + '/')
     api.add_resource(AverageScorePlot, AverageScorePlot.route())
+
+
+    # Swagger doc generation
+    docs = FlaskApiSpec(app)
+
 
     return app
