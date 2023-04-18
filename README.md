@@ -51,7 +51,7 @@ The following are additional notes on project submission
 
 # Running the project
 
-<b>TL;DR</b>: Call the [run script](run.sh) from the project root.
+<b>TL;DR</b>: Call the [run script](run.sh) from the project root to run the backend and call `npm run dev` separately from the `Webservices-consumer` directory.
 
 The following sections describe how to run the project on **linux**. It is not guaranteed to work on windows. Feel free to skip the [installation section](#intallation) and go straight to the [startup section](#startup) as the startup script runs the installation step automatically anyways. The installation section is only present for the sake of completeness.
 
@@ -66,10 +66,17 @@ Before running the API and web interface, the necessary project setup must be do
 
 ## Startup
 
-To run the API and web interface, simply call the [run script](run.sh) **from the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
+To run the API, simply call the [run script](run.sh) **from the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
 
 ```sh
 ./run.sh
+```
+
+To run the frontend application, call `npm run dev` from the `Webservices-consumer` directory.
+
+```sh
+cd Webservices-consumer
+npm run dev
 ```
 
 # Encountered Technical Difficulties
