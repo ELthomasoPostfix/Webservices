@@ -11,5 +11,7 @@ python3 -m venv venv;
 echo "[Install] Install dependencies";
 pip install -r requirements.txt;
 
+cd Webservices-consumer
+npm install
 
 echo "[Install] Finished installation script";
