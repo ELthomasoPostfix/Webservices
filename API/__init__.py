@@ -124,10 +124,11 @@ def create_app(test_config: Mapping[str, Any]=None):
     # Swagger doc generation
     docs = FlaskApiSpec(app)
 
-    docs.register(Likes)
-    docs.register(Like)
     docs.register(Movies)
     docs.register(PopularMovies)
     docs.register(Movie)
+    docs.register(Likes)
+    docs.register(Like)
+    docs.register(Similar)
 
     return app
