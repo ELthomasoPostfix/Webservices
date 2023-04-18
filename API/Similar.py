@@ -1,12 +1,14 @@
 from json import JSONDecodeError
 from typing import List, Callable, Set
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
+from flask_apispec import MethodResource, marshal_with, marshal_with, doc
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKTMDB
 from .Movie import Movie
 from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
 from .APIClients import TMDBClient
+from .schemaModels import MoviesSchema, generate_params_from_parser
 
 
 class SimilarityParameters(object):
@@ -142,12 +144,12 @@ parser.add_argument(SimilarityParameters.GENRES, required=False, location=('args
                     help="Get the movies whose genres match exactly with the subject movie")
 parser.add_argument(SimilarityParameters.RUNTIME, required=False, location=('args',),
                     help="Get the movies whose runtime is similar to the subject movie")
-parser.add_argument('amount', required=True, type=int, location=('args',),
-                    help="Get *amount* of movies similar to the subject movie")
+parser.add_argument('amount', type=int, required=True, location=('args',),
+                    help="The amount of movies similar to the subject movie to fetch, as a positive integer")
 
 
 
-class Similar(Resource):
+class Similar(MethodResource):
     """The api endpoint that represents a collection of movie resource similar to a specified, similar movie resource.
 
     This resource supports project requirement 2.: exactly matching genres,
@@ -161,6 +163,12 @@ class Similar(Resource):
         """
         return f"{Movie.route()}/similar"
 
+    @doc(description='The collection of Movie resources that are similar to the specified reference movie, based on the reference movie\'s characteristics',
+         params={
+            **generate_params_from_parser(parser),
+            'mov_id': {'description': 'The TMDB ID of the chosen movie, for which to fetch similar movies'}
+         })
+    @marshal_with(MoviesSchema, code=(200, 404, 502))
     @catch_unexpected_exceptions("find similar movies")
     @require_movie_not_deleted
     def get(self, mov_id: int):
