@@ -130,5 +130,6 @@ def create_app(test_config: Mapping[str, Any]=None):
     docs.register(Likes)
     docs.register(Like)
     docs.register(Similar)
+    docs.register(AverageScorePlot)
 
     return app
