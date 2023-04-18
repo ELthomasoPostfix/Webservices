@@ -268,7 +268,7 @@ async function onTriggerDelete(movie: Movie) {
       <div class="movie-card-reference">
         <Movie404Card v-if="similar_response_code === 404" :movie-id="movie_id"/>
         <MoviePlacedolderCard v-else-if="reference_movie_data === undefined"
-          :width="500"
+          :max-width="500"
         />
         <MovieIconCard v-else
           :movie="reference_movie_data"

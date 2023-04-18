@@ -4,12 +4,12 @@ import { computed } from "vue";
 import PlaceholderRect from './PlaceholderRect.vue';
 
 const props = defineProps<{
-  /**  */
-  width: Number;
+  /** The max-width of the placeholder card in px. */
+  maxWidth: Number;
 }>();
 
 const width_style = computed(() => {
-  return `max-width: ${props.width}px`;
+  return `max-width: ${props.maxWidth}px`;
 })
 </script>
 
