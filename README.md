@@ -79,6 +79,88 @@ cd Webservices-consumer
 npm run dev
 ```
 
+# RESTful Design Considerations
+
+This section elaborates on the design considerations relating to the RESTfulness of the Webservices API, which functions as a TMDB aggregator/proxy.
+
+Note that any mention of the *Webservices API* refers to the API we are required to write as part of the assignment; it refers to the API detailed in the assignment pdf.
+
+For each resource and collection, the supported CRUD http methods are listed, since they provide additional insight into purpose of each resource and collection, though of course REST does not necessarily equate http.
+
+## Movies Collection
+
+The movies collection represents the collection of all Movie resources. Its implementation is warranted to adhere to the RESTful principle of "hackable up the tree". Its sole purpose is to be a parent/collection of single movie resources. In doing so, it allows the intuitive specification of the subject movie for following, more specialised resources.
+
+The corresponding endpoint is `/api/movies/`. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets the list of all movies
+* ~~PUT~~: Method Not Allowed
+* ~~DELETE~~: Method Not Allowed
+
+## Popular Movies Collection
+
+The popular movies collection represents the collection of all popular Movie resources. It constitutes project requirement 1: get x popular movies. By treating the collection of popular movies as a resource in and of itself, we can avoid adding it as subfunctionality to the `/api/movies/` endpoint. This allows it to adhere to the RESTful principle of "hackable up the tree" and prevents unnecessary query parameters for `/api/movies/`.
+
+The corresponding endpoint is `/api/movies/popular?amount=x`. The `amount` parameter purely facilitates the popularx functionality. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets the first x popular movies
+* ~~PUT~~: Method Not Allowed
+* ~~DELETE~~: Method Not Allowed
+
+## Average Score Plot Resource
+
+An average score plot resource represents a barplot of the average scores of the specified movies. The plot itself is transparently treated as a resource, though the corresponding backend queries the quickchart API.
+
+The corresponding endpoint is `/api/movies/average-score-plot?ids=ids_csv` where `ids_csv` is a comma separated list of movie ids. The `ids` parameter purely facilitates the plotting functionality. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets the first x popular movies
+* ~~PUT~~: Method Not Allowed
+* ~~DELETE~~: Method Not Allowed
+
+## Movie Resource
+
+The Movie resource, which represents a single TMDB movie, is also not required by the project specification. Similarly to the movies collection, it organically enables access to more specialised resources, through a logical, hackable path.
+
+The corresponding endpoint is `/api/movies/{mov_id}`. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets a barplot of the average scores of the specified movies
+* ~~PUT~~: Method Not Allowed
+* ~~DELETE~~: Method Not Allowed
+
+## Likes Collection
+
+The likes collection is just that, a collection of all Like resources. However, a single Like resource consits of a single status boolean. Thus, to make the likes collection as complete and simple as possible, it manifests as a list of the TMDB ids of all liked movies in the API response. It is the set of all TMDB movie ids that, at the moment of querying, are marked as `liked` in the API backend.
+
+Similarly to the movies collection, the likes collection provides a hackable structure to further like/un-like functionality. It also makes for an easy way to verify the required like/un-like project functionality.
+
+The corresponding endpoint is `/api/likes/`. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets the list of all movie ids currently marked as `liked`
+* ~~PUT~~: Method Not Allowed
+* ~~DELETE~~: Method Not Allowed
+
+## Like Resource
+
+The like resource represents a `(movie_id, liked)` pair, where `movie_id` is a TMDB movie id and `liked` a boolean denoting whether the movie is currently marked as liked.
+
+The corresponding endpoint is `/api/likes/<int:mov_id>`. The CRUD http operations are supported as follows:
+
+* ~~POST~~: Method Not Allowed
+* GET: gets the `(movie_id, liked)` pair corresponding to the `mov_id` url parameter
+* PUT: set the `liked` property of the `(movie_id, liked)` pair corresponding to `mov_id` to `true`
+* DELETE: set the `liked` property of the `(movie_id, liked)` pair corresponding to `mov_id` to `false`
+
+The reasoning behind supporting the PUT method and not the POST method is that this simple application does not make use of, or keeps track of _any_ users. This implies that the `liked` state of a movie, though it is a resource in the API implementation, acts like property of a movie that is shared between *all* consumers of the Webservices API. In that sense, it is more intuitive for this property to default to `false` for all movies and it being immediately open to updating with PUT, than for a like to first need to be created using POST.
+
+Another possible implementation for the like functionality would have been the addition of a `/api/movies/<mov_id>/like` route. Such a format treats the `/like` postfix more like an action than a resource, making it practical but ultimately not quite RESTful. 
+
+A last option would have been a `/api/movies/<mov_id>?like=t/f` style extension of the [movie resource](#movie-resource). But, this somewhat goes against the REST principles of "Few operations, many URI" in that it foregoes an extra URI in favor of including that functionality into an existing one and also goes against "Query arguments are only for parameters" as the like functionality is implementable without the parameter in this case. It can be argued that adding `?like=t/f` to the URL changes the resource that is being communicated with from a movie resource to a like resource. In the end, it comes down to the fact that the API implementation treats a like as a separate resource, because this makes the api more modular and extensible and because REST prefers resources over applications.
+
 # Encountered Technical Difficulties
 
 This section documents any technical difficulties and implementational struggles I encountered while working on this assignment. It is purely for my own benefit and to ease future review of this project's code.
