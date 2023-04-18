@@ -1,5 +1,5 @@
 from json import JSONDecodeError
-from flask_restful import Resource
+from flask_apispec import MethodResource, marshal_with, marshal_with, doc
 
 from .utils import catch_unexpected_exceptions, require_movie_not_deleted
 from .exceptions import NotOKTMDB
@@ -7,9 +7,10 @@ from .MovieAttributes import MovieAttributes
 from .Movies import Movies
 from .APIResponses import GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB, make_response_error, make_response_message
 from .APIClients import TMDBClient
+from .schemaModels import WebservicesResponseSchema, MovieSchema
 
 
-class Movie(Resource):
+class Movie(MethodResource):
     """The api endpoint that represents a single movie resource.
 
     This resource supports project requirement 6.: ’delete’ movies
@@ -23,6 +24,10 @@ class Movie(Resource):
         """
         return f"{Movies.route()}/<int:mov_id>"
 
+    @doc(description='Get a single Movie resource, which represents the primary info of a TMDB movie.', params={
+        'mov_id': {'description': 'The TMDB ID of the chosen movie, for which to fetch the primary movie data'}
+    })
+    @marshal_with(MovieSchema, code=(200, 404, 502))
     @catch_unexpected_exceptions("fetch a movie's primary information")
     @require_movie_not_deleted
     def get(self, mov_id: int):
@@ -48,6 +53,10 @@ class Movie(Resource):
         except NotOKTMDB as e:
             return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)
 
+    @doc(description='Remove a single Movie resource from any and all Webservices API responses, until the next API restart.', params={
+        'mov_id': {'description': 'The TMDB ID of the chosen movie, which to delete'}
+    })
+    @marshal_with(WebservicesResponseSchema, code=200)
     @catch_unexpected_exceptions("delete a movie")
     @require_movie_not_deleted
     def delete(self, mov_id: int):

@@ -1,10 +1,12 @@
 from requests.exceptions import JSONDecodeError
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
+from flask_apispec import MethodResource, marshal_with, marshal_with, doc
 
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB
 from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB
 from .APIClients import TMDBClient
+from .schemaModels import MoviesSchema, generate_params_from_parser
 
 
 class MoviesParameters(object):
@@ -26,7 +28,7 @@ parser.add_argument(MoviesParameters.amount, type=int, required=True, location=(
                     help="The amount of movies to fetch, as a positive integer")
 
 
-class Movies(Resource):
+class Movies(MethodResource):
     """The api endpoint that represents the collection of all movie resources.
     """
     @staticmethod
@@ -37,6 +39,9 @@ class Movies(Resource):
         """
         return "/movies"
 
+    @doc(description='The collection of Movie resources, which individually represent the primary info of a TMDB movie.',
+         params=generate_params_from_parser(parser))
+    @marshal_with(MoviesSchema, code=(200, 400, 502))
     @catch_unexpected_exceptions("fetch the Movies collection")
     def get(self):
         """The fetch endpoint of the collection of all Movie resources.
@@ -90,5 +95,3 @@ class Movies(Resource):
             return make_response_error(E_MSG.ERROR, E_TMDB.ERROR_JSON_DECODE, 502)
         except NotOKTMDB as e:
             return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)
-
-

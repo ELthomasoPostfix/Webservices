@@ -1,11 +1,13 @@
 from requests.exceptions import JSONDecodeError
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
+from flask_apispec import MethodResource, marshal_with, marshal_with, doc
 
 from .utils import catch_unexpected_exceptions
 from .exceptions import NotOKTMDB
 from .APIResponses import make_response_message, make_response_error, GenericResponseMessages as E_MSG, TMDBResponseMessages as E_TMDB
 from .APIClients import TMDBClient
 from .Movies import Movies
+from .schemaModels import MoviesSchema, generate_params_from_parser
 
 
 class PopularMoviesParameters(object):
@@ -30,10 +32,10 @@ section of the README.
 """
 parser = reqparse.RequestParser()
 parser.add_argument(PopularMoviesParameters.amount, type=int, required=True, location=('args',),
-                    help="The amount of popular movies, as a positive integer")
+                    help="The amount of popular movies to retrieve, as a positive integer")
 
 
-class PopularMovies(Resource):
+class PopularMovies(MethodResource):
     """The api endpoint that represents the collection of all popular Movie resources.
     """
     @staticmethod
@@ -44,6 +46,9 @@ class PopularMovies(Resource):
         """
         return f"{Movies.route()}/popular"
 
+    @doc(description='The collection of popular Movie resources, which individually represent the primary info of a popular TMDB movie.',
+         params=generate_params_from_parser(parser))
+    @marshal_with(MoviesSchema, code=(200, 400, 502))
     @catch_unexpected_exceptions("query the Movies collection")
     def get(self):
         """The query endpoint of the collection of all popular Movie resources.
@@ -99,5 +104,3 @@ class PopularMovies(Resource):
             return make_response_error(E_MSG.ERROR, E_TMDB.ERROR_JSON_DECODE, 502)
         except NotOKTMDB as e:
             return make_response_error(E_MSG.ERROR, E_TMDB.NOT_OK, 502)
-
-
