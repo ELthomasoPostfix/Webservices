@@ -23,7 +23,9 @@ class Like(MethodResource):
         """
         return f"{Likes.route()}/<int:mov_id>"
 
-    @doc(description='Get a single Like resource, which represents the "liked" status of a movie.')
+    @doc(description='Get a single Like resource, which represents the "liked" status of a movie.', params={
+        'mov_id': {'description': 'The TMDB ID of the chosen movie, for which to fetch the "liked" status'}
+    })
     @marshal_with(LikeSchema, code=200)
     @catch_unexpected_exceptions("fetch a Like resource")
     @require_movie_not_deleted
@@ -40,7 +42,9 @@ class Like(MethodResource):
 
         return make_response_message(E_MSG.SUCCESS, 200, id=mov_id, liked=liked)
     
-    @doc(description='Set a single Like resource\'s "liked" status to True.')
+    @doc(description='Set a single Like resource\'s "liked" status to True.', params={
+        'mov_id': {'description': 'The TMDB ID of the chosen movie, for which to set the "liked" status'}
+    })
     @marshal_with(WebservicesResponseSchema, code=201)
     @catch_unexpected_exceptions("set a Like resource to true")
     @require_movie_not_deleted
@@ -58,7 +62,9 @@ class Like(MethodResource):
 
         return make_response_message(E_MSG.SUCCESS, 201)
 
-    @doc(description='Set a single Like resource\'s "liked" status to False.')
+    @doc(description='Set a single Like resource\'s "liked" status to False.', params={
+        'mov_id': {'description': 'The TMDB ID of the chosen movie, for which to set the "liked" status'}
+    })
     @marshal_with(WebservicesResponseSchema, code=200)
     @catch_unexpected_exceptions("set a Like resource to false")
     @require_movie_not_deleted
