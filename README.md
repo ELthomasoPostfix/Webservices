@@ -51,13 +51,13 @@ The following are additional notes on project submission
 
 # Running the project
 
-<b>TL;DR</b>: Call the [run script](run.sh) from the project root to run the backend and call `npm run dev` separately from the `Webservices-consumer` directory.
+<b>TL;DR</b>: Call the [run script](run.sh) from the project root to run both the frontend application and the backend API.
 
 The following sections describe how to run the project on **linux**. It is not guaranteed to work on windows. Feel free to skip the [installation section](#intallation) and go straight to the [startup section](#startup) as the startup script runs the installation step automatically anyways. The installation section is only present for the sake of completeness.
 
 ## Intallation
 
-Before running the API and web interface, the necessary project setup must be done. As python and [Flask](https://flask.palletsprojects.com/en/2.2.x/) are used, this includes setting up the python virtual environment and installing all dependencies. This step can be completed by simply calling the [install script](install.sh) **from the project root**.
+Before running the API and web interface, the necessary project setup must be done. As python, [Flask](https://flask.palletsprojects.com/en/2.2.x/) and [Vue3](https://vuejs.org/guide/introduction.html) with [Vite](https://vitejs.dev/) as build took are used, this includes setting up the python virtual environment, installing all python dependencies and installing the node dependencies. This step can be completed by simply calling the [install script](install.sh) **from the project root**.
 
 ```sh
 ./install.sh
@@ -66,17 +66,10 @@ Before running the API and web interface, the necessary project setup must be do
 
 ## Startup
 
-To run the API, simply call the [run script](run.sh) **from the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
+To run the backend API and frontend application, simply call the [run script](run.sh) **from the project root**. This script considers the existence of a `venv/` folder in the project root to be proof the the installation having happened already. However, it should prompt the user to ask if reinstallation is desired anyways.
 
 ```sh
 ./run.sh
-```
-
-To run the frontend application, call `npm run dev` from the `Webservices-consumer` directory.
-
-```sh
-cd Webservices-consumer
-npm run dev
 ```
 
 # RESTful Design Considerations
