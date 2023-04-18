@@ -126,5 +126,8 @@ def create_app(test_config: Mapping[str, Any]=None):
 
     docs.register(Likes)
     docs.register(Like)
+    docs.register(Movies)
+    docs.register(PopularMovies)
+    docs.register(Movie)
 
     return app
