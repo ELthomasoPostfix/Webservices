@@ -19,6 +19,14 @@ then
   ./install.sh;
 fi
 
+echo "[Run] Start frontend application";
+
+# Run API consumer
+cd Webservices-consumer;
+npm run dev &
+cd ..;
+
+
 echo "[Run] Start web server";
 
 # Run project
