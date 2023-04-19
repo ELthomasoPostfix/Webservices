@@ -56,7 +56,7 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
         # delete, ...) as its name.
         decorator.__name__ = http_method.__name__
         
-        def wrapper(*args, **kwargs) -> flask.Response | Any:
+        def wrapper(*args, **kwargs) -> flask.Response:
             try:
                 return http_method(*args, **kwargs)
             # Let reqparse error feedback through
@@ -68,6 +68,8 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
                     return make_response_error(E_MSG.UNEXPECTED, f"Unexpected error, failed to {action_description}", 500,
                                                exception=str(e))
                 return make_response_error(E_MSG.UNEXPECTED, f"Unexpected error, failed to {action_description}", 500)
+            finally:
+                return None
 
         return wrapper
     return decorator
