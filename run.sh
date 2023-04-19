@@ -30,6 +30,7 @@ cd ..;
 echo "[Run] Start web server";
 
 # Run project
+. venv/bin/activate;
 flask --app API --debug run;
 
 
