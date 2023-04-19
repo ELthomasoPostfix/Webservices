@@ -1,4 +1,6 @@
 SECRET_KEY='dev'
 API_KEY_TMDB='ebae29385c26d7eb94b6daa8e41175a4'
-APISPEC_SWAGGER_URL='/swagger/'
-APISPEC_SWAGGER_UI_URL='/swagger-ui/'
+APISPEC_SWAGGER_URL='/api/swagger/'
+APISPEC_SWAGGER_UI_URL='/api/swagger-ui/'
+APISPEC_TITLE='Webservices'
+APISPEC_VERSION='1.0'
