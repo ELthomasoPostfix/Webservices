@@ -12,7 +12,6 @@ echo "[Install] Install dependencies";
 pip install -r requirements.txt;
 
 cd Webservices-consumer
-npm install node
 npm install
 
 echo "[Install] Finished installation script";
