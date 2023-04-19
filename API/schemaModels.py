@@ -1,9 +1,8 @@
 from flask_restful import reqparse
 from marshmallow import Schema, fields, validates, ValidationError
-from typing import Type
 
 
-def to_params_type(python_type: Type) -> str:
+def to_params_type(python_builtin_cls) -> str:
     """Convert a python type to an apispec params type string.
 
     The apispec params type string can be passed to the @doc
@@ -26,8 +25,8 @@ def to_params_type(python_type: Type) -> str:
         str: "string",
         bool: "boolean",
     }
-    if python_type in valid_type_mapping:
-        return valid_type_mapping[python_type]
+    if python_builtin_cls in valid_type_mapping:
+        return valid_type_mapping[python_builtin_cls]
     else:
         return "null"
 
