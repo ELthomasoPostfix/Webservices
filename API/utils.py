@@ -1,6 +1,6 @@
 import flask
 from werkzeug import exceptions as w_exceptions
-from typing import Any, Callable
+from typing import Callable
 
 from .APIResponses import GenericResponseMessages as E_MSG, make_response_error
 
@@ -68,8 +68,6 @@ def catch_unexpected_exceptions(action_description: str, return_exception: bool=
                     return make_response_error(E_MSG.UNEXPECTED, f"Unexpected error, failed to {action_description}", 500,
                                                exception=str(e))
                 return make_response_error(E_MSG.UNEXPECTED, f"Unexpected error, failed to {action_description}", 500)
-            finally:
-                return None
 
         return wrapper
     return decorator
